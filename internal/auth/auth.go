@@ -125,17 +125,23 @@ func (env *Authenv) AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			// extract user_id (JWT numeric types come as float64)
+			// Достаем и ID, и Login
 			userID := int(claims["user_id"].(float64))
+			login := claims["login"].(string)
+
+			// Кладем в контекст оба значения
 			ctx := context.WithValue(r.Context(), userIDKey, userID)
+			ctx = context.WithValue(ctx, "userLogin", login) // Ключ "userLogin"
+
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 	})
 }
-func (env *Authenv) addCookie(w http.ResponseWriter, userID int) {
+func (env *Authenv) addCookie(w http.ResponseWriter, userID int, login string) {
 	// Create JWT cookie
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": userID,
+		"login":   login,
 		"exp":     time.Now().Add(30 * 24 * time.Hour).Unix(), // Токен на месяц
 	})
 	tokenString, err := token.SignedString(env.JWTkey)
@@ -190,7 +196,7 @@ func (env *Authenv) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	env.addCookie(w, id)
+	env.addCookie(w, id, req.Login)
 	// Явно говорим, что ресурс создан
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte("Registration successful"))
@@ -216,7 +222,7 @@ func (env *Authenv) AuthHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid login or password", http.StatusUnauthorized)
 		return
 	}
-	env.addCookie(w, id)
+	env.addCookie(w, id, req.Login)
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("Authentication successful"))
 }

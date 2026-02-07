@@ -2,6 +2,7 @@ package main
 
 import (
 	auth "Vertex/internal/auth"
+	profile "Vertex/internal/profile"
 	repo "Vertex/internal/repo"
 	"context"
 	"database/sql"
@@ -47,6 +48,7 @@ func HandleList(mux *mux.Router, db *sql.DB) {
 	}
 
 	authEnv := &auth.Authenv{JWTkey: []byte(tokenKey), Repo: userRepo}
+	profileH := &profile.ProfileHandler{Repo: userRepo}
 
 	limiter := auth.NewIPRateLimiter(1, 3)
 
@@ -57,9 +59,10 @@ func HandleList(mux *mux.Router, db *sql.DB) {
 	// Публичные эндпоинты (Доступны всем без токена)
 	api.HandleFunc("/login", authEnv.AuthHandler).Methods("POST")
 	api.HandleFunc("/register", authEnv.RegisterHandler).Methods("POST")
-
-	// Приватные эндпоинты (Только для админов)
-
+	secureApi := api.PathPrefix("/user").Subrouter()
+	secureApi.Use(authEnv.AuthMiddleware) // Твой Middleware для проверки токена
+	secureApi.HandleFunc("/profile", profileH.GetProfile).Methods("GET")
+	secureApi.HandleFunc("/upload-avatar", profileH.UploadAvatar).Methods("POST")
 	// --- 2. МЕДИА-КОНТЕНТ ---
 	// Картинки должны отдаваться без всяких проверок авторизации
 	uploadsStatic := http.StripPrefix("/uploads/", http.FileServer(http.Dir("./static/uploads/")))
