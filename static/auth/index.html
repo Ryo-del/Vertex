@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertex — Авторизация</title>
+    <style>
+        :root {
+            --apple-bg: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-blue: #0071e3;
+            --apple-gray: #f5f5f7;
+            --apple-border: #d2d2d7;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 320px; /* Более компактный вид */
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 52px;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--apple-border);
+            border-radius: 10px;
+            font-size: 16px;
+            box-sizing: border-box;
+            outline: none;
+            background-color: rgba(255, 255, 255, 0.8);
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            border-color: var(--apple-blue);
+            box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.1);
+        }
+
+        .button-group {
+            margin-top: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--apple-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0077ed;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--apple-blue);
+            border: 1px solid var(--apple-blue);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(0, 113, 227, 0.05);
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container fade-in">
+    <div class="logo">🏗️</div>
+    <h1>Vertex Foundation</h1>
+
+    <form id="authForm" onsubmit="handleAuth(event, '/api/login')">
+        <div class="input-group">
+            <input type="text" id="login" placeholder="Логин" required>
+        </div>
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Электронная почта" required>
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Пароль" required>
+        </div>
+
+        <div class="button-group">
+            <button type="submit" class="btn-primary">Войти</button>
+            <button type="button" class="btn-secondary" onclick="handleAuth(event, '/api/register')">Создать аккаунт</button>
+        </div>
+    </form>
+    <div id="error-message" style="color: #ff3b30; font-size: 13px; margin-top: 15px; display: none;"></div>
+</div>
+
+<script>
+async function handleAuth(event, url) {
+    event.preventDefault();
+    
+    const login = document.getElementById('login').value;
+    const password = document.getElementById('password').value;
+    const email = document.getElementById('email').value;
+    const errorBox = document.getElementById('error-message');
+    
+    // Скрываем прошлые ошибки
+    errorBox.style.display = 'none';
+
+    // Формируем JSON объект (Email пока пустой, так как в форме его нет)
+    const data = {
+        login: login,
+        email: email, 
+        password: password
+    };
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+            // Если успех (200 или 201) — перенаправляем на главную
+            window.location.href = '/';
+        } else {
+            const errorText = await response.text();
+            errorBox.innerText = "Ошибка: " + errorText;
+            errorBox.style.display = 'block';
+        }
+    } catch (error) {
+        errorBox.innerText = "Ошибка сервера. Проверьте соединение.";
+        errorBox.style.display = 'block';
+    }
+}
+</script>
+</body>
+</html>
