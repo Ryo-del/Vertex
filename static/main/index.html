@@ -23,6 +23,7 @@
             background: var(--apple-bg);
             color: var(--apple-text);
             min-height: 100vh;
+            overflow: hidden;
         }
 
         .page {
@@ -41,6 +42,8 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            max-height: calc(100vh - 56px);
+            overflow-y: auto;
         }
 
         .sidebar h2 {
@@ -218,7 +221,29 @@
             gap: 12px;
         }
 
-        .result-card {
+        
+        .doc-card {
+            background: #f7f7f9;
+            border: 1px solid var(--apple-border);
+            border-radius: 16px;
+            padding: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .doc-name {
+            font-size: 13px;
+            color: var(--apple-text);
+            word-break: break-all;
+        }
+        .doc-link {
+            font-size: 12px;
+            color: var(--apple-blue);
+            text-decoration: none;
+        }
+
+.result-card {
             background: #f7f7f9;
             border: 1px solid var(--apple-border);
             border-radius: 16px;
@@ -245,6 +270,8 @@
             background: var(--apple-card);
             border-radius: 20px;
             padding: 10px 12px;
+            text-decoration: none; /* убираем подчеркивание */
+    color: inherit; /* чтобы текст не стал синим */
             display: flex;
             align-items: center;
             gap: 10px;
@@ -276,7 +303,14 @@
             color: var(--apple-secondary);
         }
 
-        @media (max-width: 980px) {
+        
+        .divider {
+            border: none;
+            border-top: 1px solid var(--apple-border);
+            margin: 10px 0 6px;
+        }
+
+@media (max-width: 980px) {
             .page {
                 grid-template-columns: 1fr;
             }
@@ -340,6 +374,48 @@
             <div class="tool-card" data-target="slab">
                 <span class="tool-emoji">🧱</span>
                 <span>Подбор арматуры плиты</span>
+            </div>
+            <hr class="divider">
+            <div class="tool-card" data-target="piles-sp">
+                <span class="tool-emoji">📊</span>
+                <span>Свайный фундамент (СП)</span>
+            </div>
+            <div class="tool-card" data-target="beam-sp">
+                <span class="tool-emoji">🏗️</span>
+                <span>Балка (СП 63)</span>
+            </div>
+            <div class="tool-card" data-target="loads-sp">
+                <span class="tool-emoji">⚖️</span>
+                <span>Нагрузки (СП)</span>
+            </div>
+            <div class="tool-card" data-target="anchors-sp">
+                <span class="tool-emoji">🧷</span>
+                <span>Анкеры (СП)</span>
+            </div>
+            <div class="tool-card" data-target="deflection-sp">
+                <span class="tool-emoji">📉</span>
+                <span>Прогиб (СП 63)</span>
+            </div>
+            <div class="tool-card" data-target="joints-sp">
+                <span class="tool-emoji">🔩</span>
+                <span>Сварные швы (СП)</span>
+            </div>
+            <div class="tool-card" data-target="column-sp">
+                <span class="tool-emoji">🏢</span>
+                <span>Колонна (СП 63)</span>
+            </div>
+            <div class="tool-card" data-target="slab-sp">
+                <span class="tool-emoji">🧱</span>
+                <span>Плита (СП 63)</span>
+            </div>
+            <div class="tool-card" data-target="report-sp">
+                <span class="tool-emoji">📝</span>
+                <span>Отчёт (СП)</span>
+            </div>
+            <hr class="divider">
+            <div class="tool-card" data-target="info">
+                <span class="tool-emoji">📁</span>
+                <span>Документы (docs)</span>
             </div>
         </aside>
 
@@ -669,17 +745,253 @@
                     <div class="result-card"><div class="label">Spacing</div><div class="value" id="slabSpacing">—</div></div>
                 </div>
             </div>
+            <div class="tool-panel" id="panel-piles-sp" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Pile Foundation (SP)</div>
+                        <div class="panel-subtitle">Input data and calculate</div>
+                    </div>
+                    <button class="primary-btn" id="runPilesSp">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Method</label>
+                        <select id="methodSp">
+                            <option value="SP24">SP 24.13330</option>
+                            <option value="SP22">SP 22.13330</option>
+                            <option value="EC7">EN 1997-1 (EC7)</option>
+                        </select>
+                    </div>
+                    <div class="field"><label>Pile type</label>
+                        <select id="pileTypeSp"><option value="square">Square</option><option value="round">Round</option></select>
+                    </div>
+                    <div class="field"><label>Side (m)</label><input id="sideMSp" type="number" step="0.01" value="0.4" /></div>
+                    <div class="field"><label>Diameter (m)</label><input id="diameterMSp" type="number" step="0.01" value="0.4" /></div>
+                    <div class="field"><label>Length (m)</label><input id="lengthMSp" type="number" step="0.1" value="12" /></div>
+                    <div class="field"><label>Toe depth (m)</label><input id="toeDepthMSp" type="number" step="0.1" value="12" /></div>
+                    <div class="field"><label>Base resistance q<sub>b</sub> (kPa)</label><input id="baseQbSp" type="number" step="1" value="3000" /></div>
+                    <div class="field"><label>G (kN)</label><input id="loadGSp" type="number" step="1" value="15000" /></div>
+                    <div class="field"><label>Q long (kN)</label><input id="loadQLongSp" type="number" step="1" value="4000" /></div>
+                    <div class="field"><label>Q short (kN)</label><input id="loadQShortSp" type="number" step="1" value="2000" /></div>
+                </div>
+                <div class="layers">
+                    <div class="layers-header">
+                        <div class="panel-title">Soil layers</div>
+                        <button class="ghost-btn" id="addLayerSp">Add layer</button>
+                    </div>
+                    <div id="layersGridSp"></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Average load per pile</div><div class="value" id="avgLoadSp">—</div></div>
+                    <div class="result-card"><div class="label">Pile count</div><div class="value" id="pileCountSp">—</div></div>
+                    <div class="result-card"><div class="label">Design resistance</div><div class="value" id="designResSp">—</div></div>
+                    <div class="result-card"><div class="label">Design load</div><div class="value" id="designLoadSp">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-beam-sp" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">RC Beam (SP 63)</div>
+                        <div class="panel-subtitle">Rectangular section flexure</div>
+                    </div>
+                    <button class="primary-btn" id="runBeamSp">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Moment (kN·m)</label><input id="beamSpM" type="number" step="0.1" value="200" /></div>
+                    <div class="field"><label>b (mm)</label><input id="beamSpB" type="number" step="1" value="300" /></div>
+                    <div class="field"><label>h<sub>0</sub> (mm)</label><input id="beamSpH0" type="number" step="1" value="500" /></div>
+                    <div class="field"><label>R<sub>b</sub> (MPa)</label><input id="beamSpRb" type="number" step="0.1" value="14" /></div>
+                    <div class="field"><label>R<sub>s</sub> (MPa)</label><input id="beamSpRs" type="number" step="1" value="365" /></div>
+                    <div class="field"><label>ξ<sub>R</sub></label><input id="beamSpXi" type="number" step="0.01" value="0.45" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Compression zone x</div><div class="value" id="beamSpX">—</div></div>
+                    <div class="result-card"><div class="label">As required</div><div class="value" id="beamSpAs">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="beamSpOk">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-loads-sp" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Loads (SP)</div>
+                        <div class="panel-subtitle">Simplified combination</div>
+                    </div>
+                    <button class="primary-btn" id="runLoadsSp">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Method</label>
+                        <select id="loadsMethodSp"><option value="SP24">SP 24.13330</option><option value="SP22">SP 22.13330</option><option value="EC7">EN 1997-1 (EC7)</option></select>
+                    </div>
+                    <div class="field"><label>G (kN)</label><input id="loadsGSp" type="number" step="1" value="15000" /></div>
+                    <div class="field"><label>Q long (kN)</label><input id="loadsQLongSp" type="number" step="1" value="4000" /></div>
+                    <div class="field"><label>Q short (kN)</label><input id="loadsQShortSp" type="number" step="1" value="2000" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Design load</div><div class="value" id="loadsDesignSp">—</div></div>
+                    <div class="result-card"><div class="label">Combination</div><div class="value" id="loadsComboSp">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-anchors-sp" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Anchors (SP)</div>
+                        <div class="panel-subtitle">Placeholder</div>
+                    </div>
+                    <button class="primary-btn" id="runAnchorsSp">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Bolt diameter (mm)</label><input id="ancDSp" type="number" step="1" value="20" /></div>
+                    <div class="field"><label>Count</label><input id="ancNSp" type="number" step="1" value="4" /></div>
+                    <div class="field"><label>f<sub>y</sub> (MPa)</label><input id="ancFySp" type="number" step="1" value="400" /></div>
+                    <div class="field"><label>γ<sub>M</sub></label><input id="ancGammaSp" type="number" step="0.01" value="1.25" /></div>
+                    <div class="field"><label>Tension (kN)</label><input id="ancTSp" type="number" step="1" value="100" /></div>
+                    <div class="field"><label>Shear (kN)</label><input id="ancVSp" type="number" step="1" value="50" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Tension capacity</div><div class="value" id="ancNrdSp">—</div></div>
+                    <div class="result-card"><div class="label">Shear capacity</div><div class="value" id="ancVrdSp">—</div></div>
+                    <div class="result-card"><div class="label">Utilization</div><div class="value" id="ancUtilSp">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="ancOKSp">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-deflection-sp" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Deflection (SP 63)</div>
+                        <div class="panel-subtitle">Simply supported, UDL</div>
+                    </div>
+                    <button class="primary-btn" id="runDeflectionSp">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Span (m)</label><input id="defLSp" type="number" step="0.1" value="6" /></div>
+                    <div class="field"><label>UDL (kN/m)</label><input id="defWSp" type="number" step="0.1" value="20" /></div>
+                    <div class="field"><label>E (GPa)</label><input id="defESp" type="number" step="1" value="30" /></div>
+                    <div class="field"><label>Width (m)</label><input id="defBSp" type="number" step="0.01" value="0.3" /></div>
+                    <div class="field"><label>Height (m)</label><input id="defHSp" type="number" step="0.01" value="0.5" /></div>
+                    <div class="field"><label>Limit (L/)</label><input id="defLimSp" type="number" step="1" value="250" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Deflection</div><div class="value" id="defValueSp">—</div></div>
+                    <div class="result-card"><div class="label">Limit</div><div class="value" id="defLimitSp">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="defOKSp">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-joints-sp" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Welds (SP)</div>
+                        <div class="panel-subtitle">Placeholder</div>
+                    </div>
+                    <button class="primary-btn" id="runJointsSp">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Weld size (mm)</label><input id="jSizeSp" type="number" step="1" value="6" /></div>
+                    <div class="field"><label>Weld length (mm)</label><input id="jLenSp" type="number" step="1" value="200" /></div>
+                    <div class="field"><label>f<sub>vw</sub> (MPa)</label><input id="jFvwSp" type="number" step="1" value="180" /></div>
+                    <div class="field"><label>γ<sub>M</sub></label><input id="jGammaSp" type="number" step="0.01" value="1.25" /></div>
+                    <div class="field"><label>Shear (kN)</label><input id="jVSp" type="number" step="1" value="60" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Capacity</div><div class="value" id="jCapSp">—</div></div>
+                    <div class="result-card"><div class="label">Utilization</div><div class="value" id="jUtilSp">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="jOKSp">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-column-sp" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">RC Column (SP 63)</div>
+                        <div class="panel-subtitle">Axial capacity</div>
+                    </div>
+                    <button class="primary-btn" id="runColumnSp">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>b (mm)</label><input id="colSpB" type="number" step="1" value="300" /></div>
+                    <div class="field"><label>h (mm)</label><input id="colSpH" type="number" step="1" value="300" /></div>
+                    <div class="field"><label>R<sub>b</sub> (MPa)</label><input id="colSpRb" type="number" step="0.1" value="14" /></div>
+                    <div class="field"><label>R<sub>s</sub> (MPa)</label><input id="colSpRs" type="number" step="1" value="365" /></div>
+                    <div class="field"><label>As (mm²)</label><input id="colSpAs" type="number" step="1" value="1200" /></div>
+                    <div class="field"><label>N (kN)</label><input id="colSpN" type="number" step="1" value="800" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Capacity</div><div class="value" id="colSpCap">—</div></div>
+                    <div class="result-card"><div class="label">Utilization</div><div class="value" id="colSpUtil">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="colSpOK">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-slab-sp" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">RC Slab (SP 63)</div>
+                        <div class="panel-subtitle">Flexural design</div>
+                    </div>
+                    <button class="primary-btn" id="runSlabSp">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Moment (kN·m/m)</label><input id="slabSpM" type="number" step="0.1" value="80" /></div>
+                    <div class="field"><label>h<sub>0</sub> (mm)</label><input id="slabSpD" type="number" step="1" value="180" /></div>
+                    <div class="field"><label>R<sub>b</sub> (MPa)</label><input id="slabSpRb" type="number" step="0.1" value="14" /></div>
+                    <div class="field"><label>R<sub>s</sub> (MPa)</label><input id="slabSpRs" type="number" step="1" value="365" /></div>
+                    <div class="field"><label>Bar Ø (mm)</label><input id="slabSpBar" type="number" step="1" value="12" /></div>
+                    <div class="field"><label>ξ<sub>R</sub></label><input id="slabSpXi" type="number" step="0.01" value="0.45" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">As required</div><div class="value" id="slabSpAs">—</div></div>
+                    <div class="result-card"><div class="label">Bar area</div><div class="value" id="slabSpArea">—</div></div>
+                    <div class="result-card"><div class="label">Spacing</div><div class="value" id="slabSpSpacing">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="slabSpOK">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-report-sp" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">PDF Report (SP)</div>
+                        <div class="panel-subtitle">Simple project report</div>
+                    </div>
+                    <button class="primary-btn" id="runReportSp">Generate PDF</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Project</label><input id="repProjectSp" type="text" value="Project A" /></div>
+                    <div class="field"><label>Author</label><input id="repAuthorSp" type="text" value="Engineer" /></div>
+                    <div class="field"><label>Title</label><input id="repTitleSp" type="text" value="Engineering Report" /></div>
+                    <div class="field" style="grid-column: 1 / -1;"><label>Notes</label><textarea id="repNotesSp">Calculation summary and conclusions.</textarea></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Status</div><div class="value" id="repStatusSp">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-info" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Documents</div>
+                        <div class="panel-subtitle">Files from /docs</div>
+                    </div>
+                    <button class="primary-btn" id="refreshDocs">Refresh</button>
+                </div>
+                <div class="panel-grid" id="docsList"></div>
+            </div>
+
         </main>
 
         <div class="right">
-            <div class="user-chip">
-                <img id="userAvatar" alt="Avatar" />
-                <div class="user-text">
-                    <div class="login" id="userLogin">@loading</div>
-                    <div class="hint">Profile</div>
-                </div>
-            </div>
+    <a href="/profile/" class="user-chip">
+        <img id="userAvatar" alt="Avatar" />
+        <div class="user-text">
+            <div class="login" id="userLogin">@loading</div>
+            <div class="hint">Profile</div>
         </div>
+    </a>
+</div>
+
     </div>
 
     <script>
@@ -707,6 +1019,7 @@
                 panels.forEach(p => p.style.display = 'none');
                 const panel = document.getElementById(`panel-${target}`);
                 if (panel) panel.style.display = 'block';
+                if (target === 'info') { loadDocs(); }
             });
         });
 
@@ -914,6 +1227,245 @@
             document.getElementById('slabArea').textContent = data.bar_area_mm2?.toFixed(1) + ' mm²';
             document.getElementById('slabSpacing').textContent = data.spacing_mm?.toFixed(0) + ' mm';
         });
+        // SP Piles
+        const layersGridSp = document.getElementById('layersGridSp');
+        const addLayerSp = document.getElementById('addLayerSp');
+        const createLayerRowSp = (data = {}) => {
+            const row = document.createElement('div');
+            row.className = 'layer-grid';
+            row.innerHTML = `
+                <input type="number" step="0.1" placeholder="From (m)" value="${data.from_depth_m ?? 0}">
+                <input type="number" step="0.1" placeholder="To (m)" value="${data.to_depth_m ?? 3}">
+                <input type="text" placeholder="Soil" value="${data.soil_type ?? 'Sand'}">
+                <input type="number" step="0.1" placeholder="γ (kN/m³)" value="${data.gamma_kn_m3 ?? 18}">
+                <input type="number" step="1" placeholder="fᵢ (kPa)" value="${data.fi_kpa ?? 25}">
+                <div style="display:flex; gap:6px;">
+                    <input type="number" step="0.01" placeholder="α" value="${data.alpha ?? 1}">
+                    <button class="remove-btn">Remove</button>
+                </div>
+            `;
+            row.querySelector('.remove-btn').addEventListener('click', () => row.remove());
+            layersGridSp.appendChild(row);
+        };
+        addLayerSp.addEventListener('click', () => createLayerRowSp());
+        createLayerRowSp({ from_depth_m: 0, to_depth_m: 4, soil_type: 'Sand', gamma_kn_m3: 18, fi_kpa: 25, alpha: 1 });
+        createLayerRowSp({ from_depth_m: 4, to_depth_m: 10, soil_type: 'Clay', gamma_kn_m3: 19, fi_kpa: 35, alpha: 0.7 });
+
+        document.getElementById('runPilesSp').addEventListener('click', async () => {
+            try {
+                const layers = Array.from(layersGridSp.children).map(row => {
+                    const inputs = row.querySelectorAll('input');
+                    return {
+                        from_depth_m: parseFloat(inputs[0].value),
+                        to_depth_m: parseFloat(inputs[1].value),
+                        soil_type: inputs[2].value,
+                        gamma_kn_m3: parseFloat(inputs[3].value),
+                        fi_kpa: parseFloat(inputs[4].value),
+                        alpha: parseFloat(inputs[5].value)
+                    };
+                });
+                const payload = {
+                    method: document.getElementById('methodSp').value,
+                    pile_type: document.getElementById('pileTypeSp').value,
+                    side_m: parseFloat(document.getElementById('sideMSp').value),
+                    diameter_m: parseFloat(document.getElementById('diameterMSp').value),
+                    length_m: parseFloat(document.getElementById('lengthMSp').value),
+                    toe_depth_m: parseFloat(document.getElementById('toeDepthMSp').value),
+                    base_qb_kpa: parseFloat(document.getElementById('baseQbSp').value),
+                    load_g_kn: parseFloat(document.getElementById('loadGSp').value),
+                    load_q_long_kn: parseFloat(document.getElementById('loadQLongSp').value),
+                    load_q_short_kn: parseFloat(document.getElementById('loadQShortSp').value),
+                    layers
+                };
+                const res = await fetch('/api/user/tools-sp/piles/calc', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                document.getElementById('avgLoadSp').textContent = data.average_load_per_pile?.toFixed(2) + ' kN';
+                document.getElementById('pileCountSp').textContent = data.pile_count ?? '—';
+                document.getElementById('designResSp').textContent = data.design_resistance_kn?.toFixed(2) + ' kN';
+                document.getElementById('designLoadSp').textContent = data.design_load_kn?.toFixed(2) + ' kN';
+            } catch (_) { alert('SP calculation failed'); }
+        });
+
+        // SP Beam
+        document.getElementById('runBeamSp').addEventListener('click', async () => {
+            const payload = {
+                moment_knm: parseFloat(document.getElementById('beamSpM').value),
+                width_mm: parseFloat(document.getElementById('beamSpB').value),
+                effective_depth_mm: parseFloat(document.getElementById('beamSpH0').value),
+                rb_mpa: parseFloat(document.getElementById('beamSpRb').value),
+                rs_mpa: parseFloat(document.getElementById('beamSpRs').value),
+                xi_r: parseFloat(document.getElementById('beamSpXi').value)
+            };
+            const res = await fetch('/api/user/tools-sp/beam/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('beamSpX').textContent = data.compression_zone_x_mm?.toFixed(1) + ' mm';
+            document.getElementById('beamSpAs').textContent = data.as_required_mm2?.toFixed(1) + ' mm²';
+            document.getElementById('beamSpOk').textContent = data.ok ? 'OK' : 'Fail';
+        });
+
+        // SP Loads
+        document.getElementById('runLoadsSp').addEventListener('click', async () => {
+            const payload = {
+                method: document.getElementById('loadsMethodSp').value,
+                load_g_kn: parseFloat(document.getElementById('loadsGSp').value),
+                load_q_long_kn: parseFloat(document.getElementById('loadsQLongSp').value),
+                load_q_short_kn: parseFloat(document.getElementById('loadsQShortSp').value)
+            };
+            const res = await fetch('/api/user/tools-sp/loads/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('loadsDesignSp').textContent = data.design_load_kn?.toFixed(2) + ' kN';
+            document.getElementById('loadsComboSp').textContent = data.combo_name || '—';
+        });
+
+        // SP Anchors
+        document.getElementById('runAnchorsSp').addEventListener('click', async () => {
+            const payload = {
+                bolt_diameter_mm: parseFloat(document.getElementById('ancDSp').value),
+                bolt_count: parseInt(document.getElementById('ancNSp').value, 10),
+                fy_mpa: parseFloat(document.getElementById('ancFySp').value),
+                gamma_m: parseFloat(document.getElementById('ancGammaSp').value),
+                tension_kn: parseFloat(document.getElementById('ancTSp').value),
+                shear_kn: parseFloat(document.getElementById('ancVSp').value)
+            };
+            const res = await fetch('/api/user/tools-sp/anchors/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('ancNrdSp').textContent = data.tension_capacity_kn?.toFixed(2) + ' kN';
+            document.getElementById('ancVrdSp').textContent = data.shear_capacity_kn?.toFixed(2) + ' kN';
+            document.getElementById('ancUtilSp').textContent = data.utilization?.toFixed(2);
+            document.getElementById('ancOKSp').textContent = data.ok ? 'OK' : 'Fail';
+        });
+
+        // SP Deflection
+        document.getElementById('runDeflectionSp').addEventListener('click', async () => {
+            const payload = {
+                span_m: parseFloat(document.getElementById('defLSp').value),
+                udl_kn_m: parseFloat(document.getElementById('defWSp').value),
+                e_gpa: parseFloat(document.getElementById('defESp').value),
+                width_m: parseFloat(document.getElementById('defBSp').value),
+                height_m: parseFloat(document.getElementById('defHSp').value),
+                deflection_limit_ratio: parseFloat(document.getElementById('defLimSp').value)
+            };
+            const res = await fetch('/api/user/tools-sp/deflection/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('defValueSp').textContent = data.deflection_mm?.toFixed(2) + ' mm';
+            document.getElementById('defLimitSp').textContent = data.deflection_limit_mm?.toFixed(2) + ' mm';
+            document.getElementById('defOKSp').textContent = data.ok ? 'OK' : 'Fail';
+        });
+
+        // SP Joints
+        document.getElementById('runJointsSp').addEventListener('click', async () => {
+            const payload = {
+                weld_size_mm: parseFloat(document.getElementById('jSizeSp').value),
+                weld_length_mm: parseFloat(document.getElementById('jLenSp').value),
+                fvw_mpa: parseFloat(document.getElementById('jFvwSp').value),
+                gamma_m: parseFloat(document.getElementById('jGammaSp').value),
+                shear_kn: parseFloat(document.getElementById('jVSp').value)
+            };
+            const res = await fetch('/api/user/tools-sp/joints/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('jCapSp').textContent = data.capacity_kn?.toFixed(2) + ' kN';
+            document.getElementById('jUtilSp').textContent = data.utilization?.toFixed(2);
+            document.getElementById('jOKSp').textContent = data.ok ? 'OK' : 'Fail';
+        });
+
+        // SP Column
+        document.getElementById('runColumnSp').addEventListener('click', async () => {
+            const payload = {
+                width_mm: parseFloat(document.getElementById('colSpB').value),
+                height_mm: parseFloat(document.getElementById('colSpH').value),
+                rb_mpa: parseFloat(document.getElementById('colSpRb').value),
+                rs_mpa: parseFloat(document.getElementById('colSpRs').value),
+                as_mm2: parseFloat(document.getElementById('colSpAs').value),
+                load_kn: parseFloat(document.getElementById('colSpN').value)
+            };
+            const res = await fetch('/api/user/tools-sp/column/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('colSpCap').textContent = data.capacity_kn?.toFixed(2) + ' kN';
+            document.getElementById('colSpUtil').textContent = data.utilization?.toFixed(2);
+            document.getElementById('colSpOK').textContent = data.ok ? 'OK' : 'Fail';
+        });
+
+        // SP Slab
+        document.getElementById('runSlabSp').addEventListener('click', async () => {
+            const payload = {
+                moment_knm_per_m: parseFloat(document.getElementById('slabSpM').value),
+                effective_depth_mm: parseFloat(document.getElementById('slabSpD').value),
+                rb_mpa: parseFloat(document.getElementById('slabSpRb').value),
+                rs_mpa: parseFloat(document.getElementById('slabSpRs').value),
+                bar_diameter_mm: parseFloat(document.getElementById('slabSpBar').value),
+                xi_r: parseFloat(document.getElementById('slabSpXi').value)
+            };
+            const res = await fetch('/api/user/tools-sp/slab/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('slabSpAs').textContent = data.as_required_mm2_per_m?.toFixed(1) + ' mm²/m';
+            document.getElementById('slabSpArea').textContent = data.bar_area_mm2?.toFixed(1) + ' mm²';
+            document.getElementById('slabSpSpacing').textContent = data.spacing_mm?.toFixed(0) + ' mm';
+            document.getElementById('slabSpOK').textContent = data.ok ? 'OK' : 'Fail';
+        });
+
+        // SP Report
+        document.getElementById('runReportSp').addEventListener('click', async () => {
+            const payload = {
+                project: document.getElementById('repProjectSp').value,
+                author: document.getElementById('repAuthorSp').value,
+                title: document.getElementById('repTitleSp').value,
+                notes: document.getElementById('repNotesSp').value
+            };
+            const res = await fetch('/api/user/tools-sp/report/pdf', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!res.ok) { document.getElementById('repStatusSp').textContent = 'Error'; return; }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'report.pdf';
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('repStatusSp').textContent = 'Downloaded';
+        });
+
+        const docsList = document.getElementById('docsList');
+        const refreshDocs = document.getElementById('refreshDocs');
+
+        async function loadDocs() {
+            if (!docsList) return;
+            docsList.innerHTML = '';
+            try {
+                const res = await fetch('/api/user/docs/list', { credentials: 'include' });
+                if (!res.ok) throw new Error('list failed');
+                const docs = await res.json();
+                if (!docs.length) {
+                    docsList.innerHTML = '<div class="doc-card"><div class="doc-name">No files in /docs</div></div>';
+                    return;
+                }
+                docs.forEach(d => {
+                    const card = document.createElement('div');
+                    card.className = 'doc-card';
+                    const name = document.createElement('div');
+                    name.className = 'doc-name';
+                    name.textContent = d.name;
+                    const link = document.createElement('a');
+                    link.className = 'doc-link';
+                    link.href = '/docs/' + d.path;
+                    link.textContent = 'Download';
+                    link.setAttribute('download', '');
+                    card.appendChild(name);
+                    card.appendChild(link);
+                    docsList.appendChild(card);
+                });
+            } catch (_) {
+                docsList.innerHTML = '<div class="doc-card"><div class="doc-name">Failed to load docs</div></div>';
+            }
+        }
+
+        if (refreshDocs) {
+            refreshDocs.addEventListener('click', loadDocs);
+        }
+
     </script>
 </body>
 </html>

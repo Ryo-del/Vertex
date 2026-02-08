@@ -2,13 +2,22 @@ package main
 
 import (
 	auth "Vertex/internal/auth"
-	piles "Vertex/internal/calc/piles"
-	beam "Vertex/internal/calc/beam"
+	anchorssp "Vertex/internal/calc/SP/anchors-SP"
+	beamsp "Vertex/internal/calc/SP/beam-SP"
+	columnsp "Vertex/internal/calc/SP/column-SP"
+	deflectionsp "Vertex/internal/calc/SP/deflection-SP"
+	jointssp "Vertex/internal/calc/SP/joints-SP"
+	loadssp "Vertex/internal/calc/SP/loads-SP"
+	pilessp "Vertex/internal/calc/SP/piles-SP"
+	reportsp "Vertex/internal/calc/SP/report-SP"
+	slabsp "Vertex/internal/calc/SP/slab-SP"
 	anchors "Vertex/internal/calc/anchors"
+	beam "Vertex/internal/calc/beam"
 	column "Vertex/internal/calc/column"
 	deflection "Vertex/internal/calc/deflection"
 	joints "Vertex/internal/calc/joints"
 	loads "Vertex/internal/calc/loads"
+	piles "Vertex/internal/calc/piles"
 	report "Vertex/internal/calc/report"
 	slab "Vertex/internal/calc/slab"
 	profile "Vertex/internal/profile"
@@ -16,7 +25,9 @@ import (
 	"context"
 	"database/sql"
 
+	"encoding/json"
 	"fmt"
+	"io/fs"
 	"os/signal"
 	"sync"
 	"syscall"
@@ -88,6 +99,15 @@ func HandleList(mux *mux.Router, db *sql.DB) {
 	loadsH := &loads.Handler{}
 	reportH := &report.Handler{}
 	slabH := &slab.Handler{}
+	beamSpH := &beamsp.Handler{}
+	anchorsSpH := &anchorssp.Handler{}
+	columnSpH := &columnsp.Handler{}
+	deflectionSpH := &deflectionsp.Handler{}
+	jointsSpH := &jointssp.Handler{}
+	loadsSpH := &loadssp.Handler{}
+	pilesSpH := &pilessp.Handler{}
+	reportSpH := &reportsp.Handler{}
+	slabSpH := &slabsp.Handler{}
 
 	secureApi.HandleFunc("/tools/beam/calc", beamH.Calc).Methods("POST")
 	secureApi.HandleFunc("/tools/loads/calc", loadsH.Calc).Methods("POST")
@@ -97,6 +117,33 @@ func HandleList(mux *mux.Router, db *sql.DB) {
 	secureApi.HandleFunc("/tools/report/pdf", reportH.Generate).Methods("POST")
 	secureApi.HandleFunc("/tools/column/calc", columnH.Calc).Methods("POST")
 	secureApi.HandleFunc("/tools/slab/calc", slabH.Calc).Methods("POST")
+
+	secureApi.HandleFunc("/tools-sp/piles/calc", pilesSpH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools-sp/beam/calc", beamSpH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools-sp/loads/calc", loadsSpH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools-sp/anchors/calc", anchorsSpH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools-sp/joints/calc", jointsSpH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools-sp/deflection/calc", deflectionSpH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools-sp/column/calc", columnSpH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools-sp/slab/calc", slabSpH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools-sp/report/pdf", reportSpH.Generate).Methods("POST")
+
+	secureApi.HandleFunc("/docs/list", func(w http.ResponseWriter, r *http.Request) {
+		type Doc struct {
+			Name string `json:"name"`
+			Path string `json:"path"`
+		}
+		var docs []Doc
+		fs.WalkDir(os.DirFS("./docs"), ".", func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() {
+				return nil
+			}
+			docs = append(docs, Doc{Name: d.Name(), Path: path})
+			return nil
+		})
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(docs)
+	}).Methods("GET")
 
 	mux.PathPrefix("/uploads/").
 		Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./static/uploads/"))))
@@ -110,6 +157,8 @@ func HandleList(mux *mux.Router, db *sql.DB) {
 	})))
 	mux.PathPrefix("/profile/").
 		Handler(authEnv.AuthMiddleware(http.StripPrefix("/profile", profileFileServer)))
+	mux.PathPrefix("/docs/").
+		Handler(authEnv.AuthMiddleware(http.StripPrefix("/docs", http.FileServer(http.Dir("./docs")))))
 	mainFileServer := http.FileServer(http.Dir("./static/main"))
 	mux.PathPrefix("/").
 		Handler(mainFileServer)
