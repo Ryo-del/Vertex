@@ -28,9 +28,11 @@ func CORS(mux *mux.Router) http.Handler {
 		w.Header().Set("Access-Control-Allow-Origin", "*") //у меня нет домена это тестовый сервер
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		if r.Method == "OPTIONS" {
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusNoContent)
 			return
 		}
+
 		mux.ServeHTTP(w, r)
 	})
 }
@@ -52,36 +54,36 @@ func HandleList(mux *mux.Router, db *sql.DB) {
 
 	limiter := auth.NewIPRateLimiter(1, 3)
 
-	// --- 1. API СЛОЙ (ВЫСШИЙ ПРИОРИТЕТ) ---
 	api := mux.PathPrefix("/api").Subrouter()
 	api.Use(limiter.LimitMiddleware)
 
-	// Публичные эндпоинты (Доступны всем без токена)
 	api.HandleFunc("/login", authEnv.AuthHandler).Methods("POST")
 	api.HandleFunc("/register", authEnv.RegisterHandler).Methods("POST")
+
 	secureApi := api.PathPrefix("/user").Subrouter()
-	secureApi.Use(authEnv.AuthMiddleware) // Твой Middleware для проверки токена
+	secureApi.Use(authEnv.AuthMiddleware)
+
 	secureApi.HandleFunc("/profile", profileH.GetProfile).Methods("GET")
+	secureApi.HandleFunc("/profile", profileH.UpdateProfile).Methods("PATCH", "PUT")
+	secureApi.HandleFunc("/profile/{id:[0-9]+}", profileH.GetProfile).Methods("GET")
 	secureApi.HandleFunc("/upload-avatar", profileH.UploadAvatar).Methods("POST")
-	// --- 2. МЕДИА-КОНТЕНТ ---
-	// Картинки должны отдаваться без всяких проверок авторизации
-	uploadsStatic := http.StripPrefix("/uploads/", http.FileServer(http.Dir("./static/uploads/")))
-	mux.PathPrefix("/uploads/").Handler(uploadsStatic)
 
-	// --- 3. СТАТИЧЕСКИЕ СТРАНИЦЫ (ИНТЕРФЕЙС) ---
+	mux.PathPrefix("/uploads/").
+		Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./static/uploads/"))))
 
-	// Авторизация (вход/рег)
-	authFileServer := http.FileServer(http.Dir("./static/auth/"))
-	mux.PathPrefix("/auth/").Handler(authEnv.RedirectIfLoggedIn(http.StripPrefix("/auth", authFileServer)))
+	authFileServer := http.FileServer(http.Dir("./static/auth"))
+	mux.PathPrefix("/auth/").
+		Handler(authEnv.RedirectIfLoggedIn(http.StripPrefix("/auth", authFileServer)))
+	profileFileServer := http.FileServer(http.Dir("./static/profile"))
+	mux.Handle("/profile/{id:[0-9]+}", authEnv.AuthMiddleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "./static/profile/index.html")
+	})))
+	mux.PathPrefix("/profile/").
+		Handler(authEnv.AuthMiddleware(http.StripPrefix("/profile", profileFileServer)))
+	mainFileServer := http.FileServer(http.Dir("./static/main"))
+	mux.PathPrefix("/").
+		Handler(mainFileServer)
 
-	// Профиль (требует логин)
-	profileFileServer := http.FileServer(http.Dir("./static/profile/"))
-	mux.PathPrefix("/profile/").Handler(authEnv.AuthMiddleware(http.StripPrefix("/profile", profileFileServer)))
-
-	// ГЛАВНАЯ СТРАНИЦА (НИЗШИЙ ПРИОРИТЕТ)
-	// Она должна быть ПОСЛЕДНЕЙ и ПУБЛИЧНОЙ
-	mainFileServer := http.FileServer(http.Dir("./static/main/"))
-	mux.PathPrefix("/").Handler(authEnv.AuthMiddleware(mainFileServer))
 }
 func main() {
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)

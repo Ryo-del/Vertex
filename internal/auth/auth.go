@@ -124,17 +124,40 @@ func (env *Authenv) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		if claims, ok := token.Claims.(jwt.MapClaims); ok {
-			// Достаем и ID, и Login
-			userID := int(claims["user_id"].(float64))
-			login := claims["login"].(string)
-
-			// Кладем в контекст оба значения
-			ctx := context.WithValue(r.Context(), userIDKey, userID)
-			ctx = context.WithValue(ctx, "userLogin", login) // Ключ "userLogin"
-
-			next.ServeHTTP(w, r.WithContext(ctx))
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			http.Redirect(w, r, "/auth/", http.StatusSeeOther)
+			return
 		}
+
+		userIDValue, ok := claims["user_id"]
+		if !ok {
+			http.Redirect(w, r, "/auth/", http.StatusSeeOther)
+			return
+		}
+		userIDFloat, ok := userIDValue.(float64)
+		if !ok {
+			http.Redirect(w, r, "/auth/", http.StatusSeeOther)
+			return
+		}
+
+		loginValue, ok := claims["login"]
+		if !ok {
+			http.Redirect(w, r, "/auth/", http.StatusSeeOther)
+			return
+		}
+		login, ok := loginValue.(string)
+		if !ok || login == "" {
+			http.Redirect(w, r, "/auth/", http.StatusSeeOther)
+			return
+		}
+
+		// Кладем в контекст оба значения
+		ctx := context.WithValue(r.Context(), userIDKey, int(userIDFloat))
+		ctx = context.WithValue(ctx, "userID", int(userIDFloat))
+		ctx = context.WithValue(ctx, "userLogin", login)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 func (env *Authenv) addCookie(w http.ResponseWriter, userID int, login string) {

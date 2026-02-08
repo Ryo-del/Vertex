@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vertex — Profile</title>
     <style>
+        /* Стили без изменений */
         :root {
             --apple-bg: #f5f5f7;
             --apple-card: #ffffff;
@@ -23,7 +24,6 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
         }
 
         .profile-card {
@@ -32,15 +32,14 @@
             background: var(--apple-card);
             border-radius: 28px;
             padding: 40px 32px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.04);
             text-align: center;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.08);
         }
 
         .avatar-container {
             width: 120px;
             height: 120px;
             margin: 0 auto 16px;
-            position: relative;
             cursor: pointer;
         }
 
@@ -49,86 +48,92 @@
             height: 100%;
             border-radius: 50%;
             object-fit: cover;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-            border: 4px solid #fff;
-            transition: filter 0.3s;
-        }
-
-        .avatar-container:hover .avatar {
-            filter: brightness(0.8);
-        }
-
-        .user-info h1 {
-            font-size: 26px;
-            font-weight: 700;
-            margin: 0;
-            letter-spacing: -0.8px;
         }
 
         .status-pill {
-            display: inline-block;
+            width: 80px;
+            margin: 0 auto;
             margin-top: 8px;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 11px;
             font-weight: 700;
-            letter-spacing: 0.5px;
             color: white;
             background: var(--premium-gradient);
-            text-transform: uppercase;
+            
         }
 
         .status-pill.regular {
+            width: 80px;
+            margin: 0 auto;
             background: #e5e5ea;
             color: #8e8e93;
         }
 
-        .email {
-            color: var(--apple-secondary-text);
-            font-size: 15px;
-            margin: 12px 0 24px;
+        .user-info {
+            margin-top: 8px;
         }
 
-        .bio {
-            font-size: 15px;
+        #userLogin {
+            margin: 8px 0 0;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.2px;
+        }
+
+        .meta {
+            margin-top: 12px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .meta-row {
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: #f2f2f7;
+            font-size: 13px;
+            color: var(--apple-secondary-text);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            line-height: 1.35;
+        }
+
+        .meta-row strong {
+            color: var(--apple-text);
+            font-weight: 600;
+        }
+
+        #userBio {
+            margin-top: 16px;
+            margin-bottom: 20px;
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: #f7f7f9;
+            color: var(--apple-text);
+            font-size: 14px;
             line-height: 1.5;
-            color: #424245;
-            background: var(--apple-bg);
-            padding: 20px;
-            border-radius: 18px;
-            margin-bottom: 30px;
-            text-align: left;
-            min-height: 60px;
         }
 
         .btn-edit {
+            
             width: 100%;
             padding: 16px;
             background-color: var(--apple-blue);
             color: white;
             border: none;
             border-radius: 14px;
-            font-size: 17px;
-            font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s, opacity 0.2s;
         }
 
-        .btn-edit:hover {
-            opacity: 0.9;
-            transform: scale(0.98);
-        }
-
-        /* Modal Styles */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            inset: 0;
             background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(8px);
             display: none;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
         }
 
         .modal-card {
@@ -137,332 +142,212 @@
             border-radius: 24px;
             width: 90%;
             max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
         }
 
-        .input-group {
+        .modal-card h2 {
+            margin: 0 0 12px;
+            font-size: 18px;
+        }
+
+        .field {
             text-align: left;
-            margin-bottom: 20px;
+            margin-top: 12px;
         }
 
-        .input-group label {
+        .field label {
             display: block;
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
             color: var(--apple-secondary-text);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
-        .input-group input, .input-group textarea {
+        .field input,
+        .field textarea {
             width: 100%;
-            padding: 12px 16px;
-            border: 1px solid #d2d2d7;
+            border: 1px solid #e1e1e6;
             border-radius: 12px;
-            font-family: inherit;
-            font-size: 16px;
-            box-sizing: border-box;
+            padding: 10px 12px;
+            font-size: 14px;
             outline: none;
+            background: #fafafa;
         }
 
-        .modal-actions {
+        .field textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        .btn-row {
             display: flex;
-            gap: 12px;
-            margin-top: 32px;
+            gap: 8px;
+            margin-top: 12px;
         }
 
-        .btn-secondary { flex: 1; padding: 14px; background: #e5e5ea; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
-        .btn-primary { flex: 2; padding: 14px; background: var(--apple-blue); color: white; border: none; border-radius: 12px; font-weight: 600; cursor: pointer; }
+        #saveProfile, #closeModal {
+            flex: 1;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+        }
 
-        .fade-in { animation: fadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1); }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        #saveProfile {
+            background: var(--apple-blue);
+            color: white;
+        }
+
+        #closeModal {
+            background: #f2f2f7;
+        }
     </style>
 </head>
 <body>
 
-<div class="profile-card fade-in">
+<div class="profile-card">
     <div class="avatar-container" id="avatarTrigger">
-        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?fit=crop&w=200&h=200" alt="Profile Photo" class="avatar">
+        <img class="avatar" id="userAvatar" alt="Avatar">
     </div>
 
     <div class="user-info">
-        <div class="status-pill regular">Regular</div>
-        <h1>@loading...</h1>
+        <div class="status-pill regular" id="userStatus">Regular</div>
+        <h1 id="userLogin">@loading</h1>
     </div>
 
-    <div class="email">...</div>
+    <div class="meta">
+        <div class="meta-row" id="userEmail"></div>
+    </div>
+    <div id="userBio"></div>
 
-    <div class="bio">...</div>
-
-    <button class="btn-edit">Edit Profile</button>
+    <button class="btn-edit" id="editBtn">Edit Profile</button>
 </div>
 
-<div id="editModal" class="modal-overlay">
+<div class="modal-overlay" id="editModal">
     <div class="modal-card">
         <h2>Edit Profile</h2>
-        <div class="input-group">
-            <label>Display Name</label>
-            <input type="text" id="editLogin">
+        <div class="field">
+            <label for="editLoginInput">Login</label>
+            <input id="editLoginInput" type="text" placeholder="your_login">
         </div>
-        <div class="input-group">
-            <label>Bio</label>
-            <textarea id="editBio" rows="4"></textarea>
+        <div class="field">
+            <label for="editBioInput">Bio</label>
+            <textarea id="editBioInput" rows="4" placeholder="Tell us about yourself"></textarea>
         </div>
-        <div class="modal-actions">
-            <button class="btn-secondary" id="closeModal">Cancel</button>
-            <button class="btn-primary" id="saveProfile">Save Changes</button>
+        <div class="btn-row">
+            <button id="saveProfile">Save</button>
+            <button id="closeModal">Cancel</button>
         </div>
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const profileApp = {
-    config: {
-        profileApi: '/api/user/profile',
-        uploadApi: '/api/user/upload-avatar',
-        updateApi: '/api/user/update'
-    },
+    const API = {
+        profile: '/api/user/profile',
+        upload: '/api/user/upload-avatar'
+    };
 
-        init() {
-            this.loadProfile();
-            this.setupEventListeners();
-        },
+    const pathParts = window.location.pathname.split('/').filter(Boolean);
+    const profileId = pathParts.length === 2 && pathParts[0] === 'profile' ? pathParts[1] : '';
+    const isSelfProfile = profileId === '';
 
-        async loadProfile() {
-    try {
-        // Use the path defined in your main.go: /api/user/profile
-        const response = await fetch(this.config.profileApi); 
-        
-        if (response.status === 401) {
+    async function loadProfile() {
+        const url = isSelfProfile ? API.profile : `${API.profile}/${profileId}`;
+        const res = await fetch(url, {
+            credentials: 'include'
+        });
+
+        if (res.status === 401) {
             window.location.href = '/auth/';
             return;
         }
 
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-
-        const data = await response.json();
-        this.updateUI(data);
-    } catch (error) {
-        console.error('❌ Profile Error:', error);
-    }
-},
-    
-
-        updateUI(user) {
-            // Источник истины — только данные с бэкенда
-            document.querySelector('h1').textContent = `@${user.login}`;
-            document.querySelector('.email').textContent = user.email;
-            document.querySelector('.bio').textContent = user.description || 'No description provided.';
-            
-            if (user.avatar_url) {
-                document.querySelector('.avatar').src = user.avatar_url;
-            }
-
-            const pill = document.querySelector('.status-pill');
-            pill.textContent = user.is_premium ? 'Premium' : 'Regular';
-            user.is_premium ? pill.classList.remove('regular') : pill.classList.add('regular');
-        },
-
-        async uploadAvatar(file) {
-            const formData = new FormData();
-            formData.append('photo', file);
-            try {
-                const res = await fetch(this.config.uploadApi, {
-                    method: 'POST',
-                    body: formData
-                });
-                if (res.ok) this.loadProfile();
-            } catch (err) {
-                console.error('❌ Upload error:', err);
-            }
-        },
-
-        async saveProfileChanges() {
-            const updatedData = {
-                login: document.getElementById('editLogin').value,
-                description: document.getElementById('editBio').value
-            };
-
-            try {
-                const res = await fetch(this.config.updateApi, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updatedData)
-                });
-                if (res.ok) {
-                    await this.loadProfile();
-                    this.closeModal();
-                }
-            } catch (err) {
-                console.error('❌ Update error:', err);
-            }
-        },
-
-        openEditModal() {
-            document.getElementById('editLogin').value = document.querySelector('h1').textContent.replace('@', '');
-            document.getElementById('editBio').value = document.querySelector('.bio').textContent;
-            document.getElementById('editModal').style.display = 'flex';
-        },
-
-        closeModal() {
-            document.getElementById('editModal').style.display = 'none';
-        },
-
-        setupEventListeners() {
-            document.querySelector('.btn-edit').addEventListener('click', () => this.openEditModal());
-            document.getElementById('closeModal').addEventListener('click', () => this.closeModal());
-            document.getElementById('saveProfile').addEventListener('click', () => this.saveProfileChanges());
-
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'image/*';
-            
-            document.getElementById('avatarTrigger').addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files[0]) this.uploadAvatar(e.target.files[0]);
-            });
-
-            window.addEventListener('click', (e) => {
-                if (e.target.className === 'modal-overlay') this.closeModal();
-            });
+        if (!res.ok) {
+            console.error('Profile fetch failed');
+            return;
         }
+
+        const user = await res.json();
+
+        document.getElementById('userLogin').textContent = '@' + user.login;
+        document.getElementById('userEmail').innerHTML = `<strong>Email</strong> ${user.email}`;
+        document.getElementById('userBio').textContent = user.description || 'No description';
+
+        document.getElementById('userAvatar').src =
+            user.avatar_url || `https://ui-avatars.com/api/?name=${user.login}`;
+
+        const pill = document.getElementById('userStatus');
+        pill.textContent = user.is_premium ? 'Premium' : 'Regular';
+        pill.classList.toggle('regular', !user.is_premium);
+    }
+
+    async function uploadAvatar(file) {
+        const fd = new FormData();
+        fd.append('photo', file);
+
+        const res = await fetch(API.upload, {
+            method: 'POST',
+            body: fd,
+            credentials: 'include'
+        });
+
+        if (res.ok) {
+            loadProfile();
+        } else {
+            alert('Upload failed');
+        }
+    }
+
+    // events
+    document.getElementById('avatarTrigger').onclick = () => {
+        if (!isSelfProfile) return;
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = e => e.target.files[0] && uploadAvatar(e.target.files[0]);
+        input.click();
     };
 
-    profileApp.init();
+    document.getElementById('editBtn').onclick = () => {
+        if (!isSelfProfile) return;
+        const loginText = document.getElementById('userLogin').textContent || '';
+        document.getElementById('editLoginInput').value = loginText.replace(/^@/, '');
+        document.getElementById('editBioInput').value =
+            document.getElementById('userBio').textContent;
+        document.getElementById('editModal').style.display = 'flex';
+    };
+
+    document.getElementById('closeModal').onclick = () => {
+        document.getElementById('editModal').style.display = 'none';
+    };
+
+    document.getElementById('saveProfile').onclick = () => {
+        if (!isSelfProfile) return;
+        const login = document.getElementById('editLoginInput').value.trim();
+        const description = document.getElementById('editBioInput').value;
+        fetch(API.profile, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ login, description }),
+            credentials: 'include'
+        }).then(res => {
+            if (res.ok) {
+                document.getElementById('editModal').style.display = 'none';
+                loadProfile();
+                return;
+            }
+            alert('Update failed');
+        }).catch(() => {
+            alert('Update failed');
+        });
+    };
+
+    loadProfile();
+
+    if (!isSelfProfile) {
+        document.getElementById('editBtn').style.display = 'none';
+    }
 });
-    const profileApp = {
-        config: {
-            // Больше никакого хардкода логина! 🔱
-            profileApi: '/api/user/profile',
-            uploadApi: '/api/user/upload-avatar'
-        },
-
-        init() {
-            this.loadProfile();
-            this.setupEventListeners();
-        },
-
-        async loadProfile() {
-    try {
-        // Никаких ?login=... — бэкенд сам всё знает из JWT
-        const response = await fetch('/api/user/profile'); 
-        
-        if (response.status === 401) {
-            window.location.href = '/auth/';
-            return;
-        }
-
-        const data = await response.json();
-        
-        // Обновляем UI данными из БД
-        document.querySelector('h1').textContent = `@${data.login}`;
-        document.querySelector('.email').textContent = data.email;
-        document.querySelector('.bio').textContent = data.description;
-        if (data.avatar_url) {
-            document.querySelector('.avatar').src = data.avatar_url;
-        }
-        
-        // Если Premium, меняем стиль плашки
-        const pill = document.querySelector('.status-pill');
-        pill.textContent = data.is_premium ? 'Premium' : 'Regular';
-        if (!data.is_premium) pill.classList.add('regular');
-
-    } catch (error) {
-        console.error('Ошибка:', error);
-    }
-},
-
-
-        updateUI(user) {
-            document.querySelector('.user-info h1').textContent = `@${user.login}`;
-            document.querySelector('.email').textContent = user.email;
-            document.querySelector('.bio').textContent = user.description || 'Go Developer. Focus on Clean Architecture.';
-            
-            if (user.avatar_url) {
-                document.querySelector('.avatar').src = user.avatar_url;
-            }
-
-            const pill = document.querySelector('.status-pill');
-            if (user.is_premium) {
-                pill.textContent = 'Premium';
-                pill.classList.remove('regular');
-            } else {
-                pill.textContent = 'Regular';
-                pill.classList.add('regular');
-            }
-        },
-
-        async uploadAvatar(file) {
-            const formData = new FormData();
-            formData.append('photo', file);
-            try {
-                const res = await fetch(`/upload-avatar?login=${this.config.defaultLogin}`, {
-                    method: 'POST',
-                    body: formData
-                });
-                if (res.ok) this.loadProfile();
-            } catch (err) {
-                console.error('❌ Upload error:', err);
-            }
-        },
-
-        async saveProfileChanges() {
-            const updatedData = {
-                login: document.getElementById('editLogin').value,
-                description: document.getElementById('editBio').value
-            };
-
-            try {
-                const res = await fetch(`${this.config.apiBase}/user/update?login=${this.config.defaultLogin}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(updatedData)
-                });
-                if (res.ok) {
-                    this.loadProfile();
-                    this.closeModal();
-                }
-            } catch (err) {
-                console.error('❌ Update error:', err);
-            }
-        },
-
-        openEditModal() {
-            const currentLogin = document.querySelector('.user-info h1').textContent.replace('@', '');
-            const currentBio = document.querySelector('.bio').textContent;
-            document.getElementById('editLogin').value = currentLogin;
-            document.getElementById('editBio').value = currentBio;
-            document.getElementById('editModal').style.display = 'flex';
-        },
-
-        closeModal() {
-            document.getElementById('editModal').style.display = 'none';
-        },
-
-        setupEventListeners() {
-            // Edit Data
-            document.querySelector('.btn-edit').addEventListener('click', () => this.openEditModal());
-            document.getElementById('closeModal').addEventListener('click', () => this.closeModal());
-            document.getElementById('saveProfile').addEventListener('click', () => this.saveProfileChanges());
-
-            // Avatar Upload
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'image/*';
-            
-            document.getElementById('avatarTrigger').addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files[0]) this.uploadAvatar(e.target.files[0]);
-            });
-
-            // Close modal on outside click
-            window.addEventListener('click', (e) => {
-                if (e.target.className === 'modal-overlay') this.closeModal();
-            });
-        }
-    };
-
-    profileApp.init();
 </script>
+
 </body>
 </html>
