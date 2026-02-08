@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Premium — Vertex</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --card: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      --text: #f8fafc;
+      --muted: rgba(248, 250, 252, 0.85);
+      --btn: #111827;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(1200px 800px at 10% 10%, #1f2937, #0b1020);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+      color: var(--text);
+    }
+    .wrap {
+      width: min(820px, 94vw);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+    }
+    .title {
+      font-size: 22px;
+      font-weight: 700;
+      margin: 0 0 6px;
+    }
+    .subtitle {
+      color: var(--muted);
+      margin: 0 0 14px;
+      font-size: 13px;
+    }
+    .price {
+      font-size: 28px;
+      font-weight: 800;
+      margin: 10px 0 18px;
+    }
+    .btn {
+      display: inline-block;
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: none;
+      background: #0f172a;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .list {
+      margin: 16px 0 0;
+      padding: 0;
+      list-style: none;
+      font-size: 13px;
+    }
+    .list li { margin: 6px 0; }
+    .qr {
+      background: #111827;
+      border-radius: 20px;
+      padding: 18px;
+      display: grid;
+      place-items: center;
+      min-height: 320px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.35);
+    }
+    .qr img {
+      width: min(260px, 70vw);
+      height: auto;
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px;
+    }
+    .hint {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .back {
+      margin-top: 14px;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      text-decoration: none;
+      display: block;
+    }
+    @media (max-width: 760px) {
+      .wrap { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <div class="title">Premium доступ</div>
+    <div class="subtitle">Открывает инструменты СП на 1 месяц</div> 
+      <div class="price">299 ₽ / месяц</div>
+      <button class="btn" id="paidBtn">Я оплатил</button>
+      <ul class="list">
+        <li>• Инструменты СП 63/20/24</li>
+        <li>• Быстрые расчеты по нормам</li>
+        <li>• Доступ к расширенным функциям</li>
+      </ul>
+      <a class="back" href="/">Вернуться на главную</a>
+    </div>
+    <div class="qr">
+      <img src="/qr/qr.png" alt="QR" />
+      <div class="hint">Отсканируйте QR и оплатите. После оплаты нажмите «Я оплатил».</div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('paidBtn').addEventListener('click', async () => {
+      const res = await fetch('/api/user/premium/request', { method: 'POST', credentials: 'include' });
+      if (!res.ok) { alert('Не удалось отправить заявку'); return; }
+      alert('Заявка отправлена. Мы проверим оплату и активируем Premium в течении 3 дней.');
+    });
+  </script>
+</body>
+</html>

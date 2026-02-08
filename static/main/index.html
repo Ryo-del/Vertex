@@ -44,6 +44,7 @@
             gap: 12px;
             max-height: calc(100vh - 56px);
             overflow-y: auto;
+            
         }
 
         .sidebar h2 {
@@ -191,9 +192,10 @@
 
         .layer-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr 0.7fr auto;
             gap: 8px;
             margin-bottom: 8px;
+            align-items: center;
         }
 
         .ghost-btn {
@@ -213,6 +215,7 @@
             padding: 6px 8px;
             cursor: pointer;
             font-size: 12px;
+            white-space: nowrap;
         }
 
         .panel-grid {
@@ -220,7 +223,6 @@
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 12px;
         }
-
         
         .doc-card {
             background: #f7f7f9;
@@ -264,6 +266,8 @@
         .right {
             display: flex;
             justify-content: flex-end;
+
+            gap: 10px;
         }
 
         .user-chip {
@@ -308,6 +312,71 @@
             border: none;
             border-top: 1px solid var(--apple-border);
             margin: 10px 0 6px;
+        }
+
+
+        .premium-card {
+            margin-top: 14px;
+            background: linear-gradient(135deg, #111827, #1f2937);
+            color: #fff;
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+        }
+        .premium-card h3 {
+            margin: 0 0 6px;
+            font-size: 14px;
+        }
+        .premium-card p {
+            margin: 0 0 10px;
+            font-size: 12px;
+            color: #e5e7eb;
+        }
+        .premium-card .price {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .right-adjusted {
+    margin-top: 10px;
+}
+
+        .premium-btn {
+            background: #10b981;
+            border: none;
+            color: #fff;
+            border-radius: 12px;
+            padding: 8px 12px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .tool-card.locked {
+            opacity: 0.6;
+        }
+        .lock-badge {
+            margin-left: auto;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+
+
+        .premium-pill {
+            margin-top: 12px;
+            border: none;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #3a2c00;
+            background: linear-gradient(135deg, #f6d365, #fda085);
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.25);
+            cursor: pointer;
+            height: fit-content;
+        }
+        .premium-pill.active {
+            background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+            color: #064e3b;
+            cursor: default;
         }
 
 @media (max-width: 980px) {
@@ -376,41 +445,41 @@
                 <span>Подбор арматуры плиты</span>
             </div>
             <hr class="divider">
-            <div class="tool-card" data-target="piles-sp">
+            <div class="tool-card" data-target="piles-sp" data-premium="true">
                 <span class="tool-emoji">📊</span>
-                <span>Свайный фундамент (СП)</span>
+                <span>Свайный фундамент (СП)</span><span class="lock-badge">🔒</span>
             </div>
-            <div class="tool-card" data-target="beam-sp">
+            <div class="tool-card" data-target="beam-sp" data-premium="true">
                 <span class="tool-emoji">🏗️</span>
-                <span>Балка (СП 63)</span>
+                <span>Балка (СП 63)</span><span class="lock-badge">🔒</span>
             </div>
-            <div class="tool-card" data-target="loads-sp">
+            <div class="tool-card" data-target="loads-sp" data-premium="true">
                 <span class="tool-emoji">⚖️</span>
-                <span>Нагрузки (СП)</span>
+                <span>Нагрузки (СП)</span><span class="lock-badge">🔒</span>
             </div>
-            <div class="tool-card" data-target="anchors-sp">
+            <div class="tool-card" data-target="anchors-sp" data-premium="true">
                 <span class="tool-emoji">🧷</span>
-                <span>Анкеры (СП)</span>
+                <span>Анкеры (СП)</span><span class="lock-badge">🔒</span>
             </div>
-            <div class="tool-card" data-target="deflection-sp">
+            <div class="tool-card" data-target="deflection-sp" data-premium="true">
                 <span class="tool-emoji">📉</span>
-                <span>Прогиб (СП 63)</span>
+                <span>Прогиб (СП 63)</span><span class="lock-badge">🔒</span>
             </div>
-            <div class="tool-card" data-target="joints-sp">
+            <div class="tool-card" data-target="joints-sp" data-premium="true">
                 <span class="tool-emoji">🔩</span>
-                <span>Сварные швы (СП)</span>
+                <span>Сварные швы (СП)</span><span class="lock-badge">🔒</span>
             </div>
-            <div class="tool-card" data-target="column-sp">
+            <div class="tool-card" data-target="column-sp" data-premium="true">
                 <span class="tool-emoji">🏢</span>
-                <span>Колонна (СП 63)</span>
+                <span>Колонна (СП 63)</span><span class="lock-badge">🔒</span>
             </div>
-            <div class="tool-card" data-target="slab-sp">
+            <div class="tool-card" data-target="slab-sp" data-premium="true">
                 <span class="tool-emoji">🧱</span>
-                <span>Плита (СП 63)</span>
+                <span>Плита (СП 63)</span><span class="lock-badge">🔒</span>
             </div>
-            <div class="tool-card" data-target="report-sp">
+            <div class="tool-card" data-target="report-sp" data-premium="true">
                 <span class="tool-emoji">📝</span>
-                <span>Отчёт (СП)</span>
+                <span>Отчёт (СП)</span><span class="lock-badge">🔒</span>
             </div>
             <hr class="divider">
             <div class="tool-card" data-target="info">
@@ -425,7 +494,7 @@
                 <p>Select a tool from the left to begin.</p>
             </div>
 
-            <div class="tool-panel" id="panel-piles" style="display:none;">
+            <div class="tool-panel" id="panel-piles" >
                 <div class="panel-header">
                     <div>
                         <div class="panel-title">Pile Foundation Calculation</div>
@@ -982,17 +1051,17 @@
 
         </main>
 
-        <div class="right">
-    <a href="/profile/" class="user-chip">
-        <img id="userAvatar" alt="Avatar" />
-        <div class="user-text">
-            <div class="login" id="userLogin">@loading</div>
-            <div class="hint">Profile</div>
+        <div class="right ">
+            <button class="premium-pill" id="buyPremium">Купить Premium</button>
+            <a href="/profile/" class="user-chip">
+                <img id="userAvatar" alt="Avatar" />
+                <div class="user-text">
+                    <div class="login" id="userLogin">@loading</div>
+                    <div class="hint">Profile</div>
+                </div>
+            </a>
         </div>
-    </a>
 </div>
-
-    </div>
 
     <script>
         (async () => {
@@ -1007,13 +1076,28 @@
                 document.getElementById('userLogin').textContent = '@' + user.login;
                 document.getElementById('userAvatar').src =
                     user.avatar_url || `https://ui-avatars.com/api/?name=${user.login}`;
+                isPremium = !!user.is_premium;
+                setPremiumUI();
+                const premRes = await fetch('/api/user/premium/status', { credentials: 'include' });
+                if (premRes.ok) {
+                    const prem = await premRes.json();
+                    isPremium = !!prem.active;
+                    setPremiumUI();
+                }
             } catch (_) {}
         })();
 
         const emptyState = document.getElementById('emptyState');
         const panels = document.querySelectorAll('.tool-panel');
-        document.querySelectorAll('.tool-card').forEach(card => {
+                emptyState.style.display = 'block';
+        panels.forEach(p => p.style.display = 'none');
+
+document.querySelectorAll('.tool-card').forEach(card => {
             card.addEventListener('click', () => {
+                if (card.dataset.premium === 'true' && !isPremium) {
+                    alert('Доступно только с Premium');
+                    return;
+                }
                 const target = card.getAttribute('data-target');
                 emptyState.style.display = 'none';
                 panels.forEach(p => p.style.display = 'none');
@@ -1026,6 +1110,16 @@
         // Piles
         const layersGrid = document.getElementById('layersGrid');
         const addLayer = document.getElementById('addLayer');
+
+        if (layersGrid) {
+            layersGrid.addEventListener('click', (e) => {
+                const btn = e.target.closest('.remove-btn');
+                if (btn) {
+                    const row = btn.closest('.layer-grid');
+                    if (row) row.remove();
+                }
+            });
+        }
         const createLayerRow = (data = {}) => {
             const row = document.createElement('div');
             row.className = 'layer-grid';
@@ -1035,12 +1129,9 @@
                 <input type="text" placeholder="Soil" value="${data.soil_type ?? 'Sand'}">
                 <input type="number" step="0.1" placeholder="γ (kN/m³)" value="${data.gamma_kn_m3 ?? 18}">
                 <input type="number" step="1" placeholder="fᵢ (kPa)" value="${data.fi_kpa ?? 25}">
-                <div style="display:flex; gap:6px;">
-                    <input type="number" step="0.01" placeholder="α" value="${data.alpha ?? 1}">
-                    <button class="remove-btn">Remove</button>
-                </div>
+                <input type="number" step="0.01" placeholder="α" value="${data.alpha ?? 1}">
+                <button type="button" class="remove-btn">Remove</button>
             `;
-            row.querySelector('.remove-btn').addEventListener('click', () => row.remove());
             layersGrid.appendChild(row);
         };
         addLayer.addEventListener('click', () => createLayerRow());
@@ -1230,6 +1321,15 @@
         // SP Piles
         const layersGridSp = document.getElementById('layersGridSp');
         const addLayerSp = document.getElementById('addLayerSp');
+        if (layersGridSp) {
+            layersGridSp.addEventListener('click', (e) => {
+                const btn = e.target.closest('.remove-btn');
+                if (btn) {
+                    const row = btn.closest('.layer-grid');
+                    if (row) row.remove();
+                }
+            });
+        }
         const createLayerRowSp = (data = {}) => {
             const row = document.createElement('div');
             row.className = 'layer-grid';
@@ -1239,12 +1339,9 @@
                 <input type="text" placeholder="Soil" value="${data.soil_type ?? 'Sand'}">
                 <input type="number" step="0.1" placeholder="γ (kN/m³)" value="${data.gamma_kn_m3 ?? 18}">
                 <input type="number" step="1" placeholder="fᵢ (kPa)" value="${data.fi_kpa ?? 25}">
-                <div style="display:flex; gap:6px;">
-                    <input type="number" step="0.01" placeholder="α" value="${data.alpha ?? 1}">
-                    <button class="remove-btn">Remove</button>
-                </div>
+                <input type="number" step="0.01" placeholder="α" value="${data.alpha ?? 1}">
+                <button type="button" class="remove-btn">Remove</button>
             `;
-            row.querySelector('.remove-btn').addEventListener('click', () => row.remove());
             layersGridSp.appendChild(row);
         };
         addLayerSp.addEventListener('click', () => createLayerRowSp());
@@ -1464,6 +1561,34 @@
 
         if (refreshDocs) {
             refreshDocs.addEventListener('click', loadDocs);
+        }
+
+        let isPremium = false;
+                const buyPremium = document.getElementById('buyPremium');
+
+        function setPremiumUI() {
+            document.querySelectorAll('.tool-card[data-premium="true"]').forEach(card => {
+                if (!isPremium) {
+                    card.classList.add('locked');
+                } else {
+                    card.classList.remove('locked');
+                }
+            });
+            document.querySelectorAll('.tool-card .lock-badge').forEach(badge => {
+                badge.style.display = isPremium ? 'none' : 'inline';
+            });
+            if (buyPremium) {
+                buyPremium.textContent = isPremium ? 'Premium активен' : 'Купить Premium';
+                buyPremium.disabled = isPremium;
+                buyPremium.classList.toggle('active', isPremium);
+            }
+        }
+
+        if (buyPremium) {
+            buyPremium.addEventListener('click', async () => {
+                if (isPremium) return;
+                window.location.href = '/pay/';
+            });
         }
 
     </script>

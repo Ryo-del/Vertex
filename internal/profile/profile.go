@@ -111,6 +111,12 @@ func (h *ProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if prof.PremiumUntil != nil && time.Now().After(*prof.PremiumUntil) {
+		_ = h.Repo.ClearPremium(r.Context(), userID)
+		prof.IsPremium = false
+		prof.PremiumUntil = nil
+	}
+
 	json.NewEncoder(w).Encode(prof)
 }
 

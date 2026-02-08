@@ -3,6 +3,7 @@ package repo
 import (
 	"context"
 	"database/sql"
+	"time"
 )
 
 // Repository — интерфейс для работы с БД
@@ -13,6 +14,9 @@ type Repository interface {
 	UpdateAvatar(ctx context.Context, userID int, avatarURL string) error
 	UpdateProfile(ctx context.Context, userID int, login string, description string) (string, error)
 	GetProfileByID(ctx context.Context, id int) (*Profile, error)
+	SetPremiumUntil(ctx context.Context, userID int, until time.Time) error
+	GetPremiumUntil(ctx context.Context, userID int) (*time.Time, error)
+	ClearPremium(ctx context.Context, userID int) error
 }
 
 type Profile struct {
@@ -21,6 +25,7 @@ type Profile struct {
 	Description string `json:"description"`
 	AvatarURL   string `json:"avatar_url"`
 	IsPremium   bool   `json:"is_premium"`
+	PremiumUntil *time.Time `json:"premium_until"`
 }
 
 type PostgresUserRepository struct {
@@ -71,24 +76,24 @@ func (r *PostgresUserRepository) GetProfileByID(ctx context.Context, id int) (*P
 	p := &Profile{}
 	// SQL: профиль привязан к id пользователя
 	query := `
-		SELECT u.login, u.email, COALESCE(p.description, ''), COALESCE(p.avatar_url, ''), p.is_premium
+		SELECT u.login, u.email, COALESCE(p.description, ''), COALESCE(p.avatar_url, ''), p.is_premium, p.premium_until
 		FROM profile p
 		JOIN users u ON u.id = p.user_id
 		WHERE p.user_id = $1
 	`
-	err := r.db.QueryRowContext(ctx, query, id).Scan(&p.Login, &p.Email, &p.Description, &p.AvatarURL, &p.IsPremium)
+	err := r.db.QueryRowContext(ctx, query, id).Scan(&p.Login, &p.Email, &p.Description, &p.AvatarURL, &p.IsPremium, &p.PremiumUntil)
 	return p, err
 }
 
 func (r *PostgresUserRepository) GetProfileByLogin(ctx context.Context, login string) (*Profile, error) {
 	p := &Profile{}
 	query := `
-		SELECT u.login, u.email, COALESCE(p.description, ''), COALESCE(p.avatar_url, ''), p.is_premium
+		SELECT u.login, u.email, COALESCE(p.description, ''), COALESCE(p.avatar_url, ''), p.is_premium, p.premium_until
 		FROM profile p
 		JOIN users u ON u.id = p.user_id
 		WHERE u.login = $1
 	`
-	err := r.db.QueryRowContext(ctx, query, login).Scan(&p.Login, &p.Email, &p.Description, &p.AvatarURL, &p.IsPremium)
+	err := r.db.QueryRowContext(ctx, query, login).Scan(&p.Login, &p.Email, &p.Description, &p.AvatarURL, &p.IsPremium, &p.PremiumUntil)
 	return p, err
 }
 
@@ -134,4 +139,27 @@ func (r *PostgresUserRepository) CreateUser(
 	}
 
 	return userID, tx.Commit()
+}
+
+func (r *PostgresUserRepository) SetPremiumUntil(ctx context.Context, userID int, until time.Time) error {
+	query := `UPDATE profile SET is_premium = true, premium_until = $1 WHERE user_id = $2`
+	_, err := r.db.ExecContext(ctx, query, until, userID)
+	return err
+}
+
+func (r *PostgresUserRepository) GetPremiumUntil(ctx context.Context, userID int) (*time.Time, error) {
+	var t sql.NullTime
+	err := r.db.QueryRowContext(ctx, `SELECT premium_until FROM profile WHERE user_id = $1`, userID).Scan(&t)
+	if err != nil {
+		return nil, err
+	}
+	if !t.Valid {
+		return nil, nil
+	}
+	return &t.Time, nil
+}
+
+func (r *PostgresUserRepository) ClearPremium(ctx context.Context, userID int) error {
+	_, err := r.db.ExecContext(ctx, `UPDATE profile SET is_premium = false, premium_until = NULL WHERE user_id = $1`, userID)
+	return err
 }
