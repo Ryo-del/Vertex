@@ -1,11 +1,919 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vertex — Tools</title>
+    <style>
+        :root {
+            --apple-bg: #f5f5f7;
+            --apple-card: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-secondary: #6e6e73;
+            --apple-blue: #0071e3;
+            --apple-border: #e5e5ea;
+            --shadow: 0 12px 30px rgba(0,0,0,0.08);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            background: var(--apple-bg);
+            color: var(--apple-text);
+            min-height: 100vh;
+        }
+
+        .page {
+            display: grid;
+            grid-template-columns: 280px 1fr 260px;
+            gap: 24px;
+            padding: 28px;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--apple-card);
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .sidebar h2 {
+            margin: 0 0 8px;
+            font-size: 16px;
+            color: var(--apple-secondary);
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .tool-card {
+            background: #f7f7f9;
+            border: 1px solid var(--apple-border);
+            border-radius: 18px;
+            padding: 14px 16px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 120ms ease, box-shadow 120ms ease;
+            cursor: pointer;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+            background: #ffffff;
+        }
+
+        .tool-emoji {
+            font-size: 18px;
+        }
+
+        .center {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-state {
+            background: var(--apple-card);
+            border-radius: 28px;
+            padding: 48px 56px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--apple-border);
+            max-width: 520px;
+            width: 100%;
+        }
+
+        .empty-state h1 {
+            margin: 0 0 10px;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .empty-state p {
+            margin: 0;
+            color: var(--apple-secondary);
+            font-size: 14px;
+        }
+
+        .tool-panel {
+            background: var(--apple-card);
+            border-radius: 28px;
+            padding: 28px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--apple-border);
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .panel-subtitle {
+            font-size: 12px;
+            color: var(--apple-secondary);
+        }
+
+        .primary-btn {
+            background: var(--apple-blue);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .field label {
+            display: block;
+            font-size: 12px;
+            color: var(--apple-secondary);
+            margin-bottom: 6px;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            border: 1px solid var(--apple-border);
+            border-radius: 12px;
+            padding: 10px 12px;
+            background: #fafafa;
+            font-size: 13px;
+        }
+
+        .field textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .layers {
+            background: #f7f7f9;
+            border: 1px solid var(--apple-border);
+            border-radius: 18px;
+            padding: 12px;
+            margin-bottom: 18px;
+        }
+
+        .layers-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .layer-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr 1fr auto;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .ghost-btn {
+            background: transparent;
+            border: 1px solid var(--apple-border);
+            border-radius: 10px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .remove-btn {
+            border: none;
+            background: #ffe8e8;
+            color: #b42318;
+            border-radius: 10px;
+            padding: 6px 8px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .panel-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .result-card {
+            background: #f7f7f9;
+            border: 1px solid var(--apple-border);
+            border-radius: 16px;
+            padding: 14px;
+        }
+
+        .result-card .label {
+            font-size: 12px;
+            color: var(--apple-secondary);
+        }
+
+        .result-card .value {
+            font-size: 16px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        .right {
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .user-chip {
+            background: var(--apple-card);
+            border-radius: 20px;
+            padding: 10px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--apple-border);
+            height: fit-content;
+        }
+
+        .user-chip img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .user-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .user-text .login {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .user-text .hint {
+            font-size: 11px;
+            color: var(--apple-secondary);
+        }
+
+        @media (max-width: 980px) {
+            .page {
+                grid-template-columns: 1fr;
+            }
+            .right {
+                justify-content: flex-start;
+            }
+            .form-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .panel-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .layer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello World</h1>
+    <div class="page">
+        <aside class="sidebar">
+            <h2>Tools</h2>
+            <div class="tool-card" data-target="piles">
+                <span class="tool-emoji">📊</span>
+                <span>Расчёт свайного фундамента</span>
+            </div>
+            <div class="tool-card" data-target="beam">
+                <span class="tool-emoji">🏗️</span>
+                <span>Подбор балки по моменту</span>
+            </div>
+            <div class="tool-card" data-target="loads">
+                <span class="tool-emoji">⚖️</span>
+                <span>Сбор нагрузок</span>
+            </div>
+            <div class="tool-card" data-target="anchors">
+                <span class="tool-emoji">🧷</span>
+                <span>Проверка анкеров</span>
+            </div>
+            <div class="tool-card" data-target="deflection">
+                <span class="tool-emoji">📉</span>
+                <span>Проверка прогиба</span>
+            </div>
+            <div class="tool-card" data-target="joints">
+                <span class="tool-emoji">🔩</span>
+                <span>Проверка сварных швов</span>
+            </div>
+            <div class="tool-card" data-target="report">
+                <span class="tool-emoji">📝</span>
+                <span>PDF отчёт</span>
+            </div>
+            <div class="tool-card" data-target="column">
+                <span class="tool-emoji">🏢</span>
+                <span>Устойчивость колонны</span>
+            </div>
+            <div class="tool-card" data-target="slab">
+                <span class="tool-emoji">🧱</span>
+                <span>Подбор арматуры плиты</span>
+            </div>
+        </aside>
+
+        <main class="center">
+            <div class="empty-state" id="emptyState">
+                <h1>Open any tool to get started</h1>
+                <p>Select a tool from the left to begin.</p>
+            </div>
+
+            <div class="tool-panel" id="panel-piles" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Pile Foundation Calculation</div>
+                        <div class="panel-subtitle">Enter input data and calculate</div>
+                    </div>
+                    <button class="primary-btn" id="runPiles">Calculate</button>
+                </div>
+
+                <div class="form-grid">
+                    <div class="field">
+                        <label for="method">Method</label>
+                        <select id="method">
+                            <option value="SP24">SP 24.13330</option>
+                            <option value="SP22">SP 22.13330</option>
+                            <option value="EC7">EN 1997-1 (EC7)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="pileType">Pile type</label>
+                        <select id="pileType">
+                            <option value="square">Square</option>
+                            <option value="round">Round</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label for="sideM">Side (m)</label>
+                        <input id="sideM" type="number" step="0.01" value="0.4" />
+                    </div>
+                    <div class="field">
+                        <label for="diameterM">Diameter (m)</label>
+                        <input id="diameterM" type="number" step="0.01" value="0.4" />
+                    </div>
+                    <div class="field">
+                        <label for="lengthM">Length (m)</label>
+                        <input id="lengthM" type="number" step="0.1" value="12" />
+                    </div>
+                    <div class="field">
+                        <label for="toeDepthM">Toe depth (m)</label>
+                        <input id="toeDepthM" type="number" step="0.1" value="12" />
+                    </div>
+                    <div class="field">
+                        <label for="baseQb">Base resistance q<sub>b</sub> (kPa)</label>
+                        <input id="baseQb" type="number" step="1" value="3000" />
+                    </div>
+                    <div class="field">
+                        <label for="loadG">Permanent load G (kN)</label>
+                        <input id="loadG" type="number" step="1" value="15000" />
+                    </div>
+                    <div class="field">
+                        <label for="loadQLong">Long-term load Q (kN)</label>
+                        <input id="loadQLong" type="number" step="1" value="4000" />
+                    </div>
+                    <div class="field">
+                        <label for="loadQShort">Short-term load Q (kN)</label>
+                        <input id="loadQShort" type="number" step="1" value="2000" />
+                    </div>
+                </div>
+
+                <div class="layers">
+                    <div class="layers-header">
+                        <div class="panel-title">Soil layers</div>
+                        <button class="ghost-btn" id="addLayer">Add layer</button>
+                    </div>
+                    <div id="layersGrid"></div>
+                </div>
+
+                <div class="panel-grid">
+                    <div class="result-card">
+                        <div class="label">Average load per pile</div>
+                        <div class="value" id="avgLoad">—</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="label">Pile count</div>
+                        <div class="value" id="pileCount">—</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="label">Design resistance</div>
+                        <div class="value" id="designRes">—</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="label">Design load</div>
+                        <div class="value" id="designLoad">—</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="label">Shaft resistance</div>
+                        <div class="value" id="shaftRes">—</div>
+                    </div>
+                    <div class="result-card">
+                        <div class="label">Base resistance</div>
+                        <div class="value" id="baseRes">—</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-beam" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Beam Section Selection</div>
+                        <div class="panel-subtitle">Bending + deflection check</div>
+                    </div>
+                    <button class="primary-btn" id="runBeam">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Material</label>
+                        <select id="beamMaterial">
+                            <option value="steel">Steel</option>
+                            <option value="rc">Reinforced Concrete</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>f<sub>y</sub> (MPa)</label>
+                        <input id="beamFy" type="number" step="1" value="235" />
+                    </div>
+                    <div class="field">
+                        <label>E (GPa)</label>
+                        <input id="beamE" type="number" step="1" value="200" />
+                    </div>
+                    <div class="field">
+                        <label>Span (m)</label>
+                        <input id="beamSpan" type="number" step="0.1" value="6" />
+                    </div>
+                    <div class="field">
+                        <label>UDL (kN/m)</label>
+                        <input id="beamUDL" type="number" step="0.1" value="20" />
+                    </div>
+                    <div class="field">
+                        <label>Width (m)</label>
+                        <input id="beamWidth" type="number" step="0.01" value="0.3" />
+                    </div>
+                    <div class="field">
+                        <label>Height (m, optional)</label>
+                        <input id="beamHeight" type="number" step="0.01" value="0" />
+                    </div>
+                    <div class="field">
+                        <label>Deflection limit (L/)</label>
+                        <input id="beamDefl" type="number" step="1" value="250" />
+                    </div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Max moment</div><div class="value" id="beamM">—</div></div>
+                    <div class="result-card"><div class="label">Required height</div><div class="value" id="beamH">—</div></div>
+                    <div class="result-card"><div class="label">Stress</div><div class="value" id="beamStress">—</div></div>
+                    <div class="result-card"><div class="label">Deflection</div><div class="value" id="beamDeflection">—</div></div>
+                    <div class="result-card"><div class="label">Deflection limit</div><div class="value" id="beamDeflLimit">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="beamOK">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-loads" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Load Combination</div>
+                        <div class="panel-subtitle">SP/EC7 simplified</div>
+                    </div>
+                    <button class="primary-btn" id="runLoads">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field">
+                        <label>Method</label>
+                        <select id="loadsMethod">
+                            <option value="SP24">SP 24.13330</option>
+                            <option value="SP22">SP 22.13330</option>
+                            <option value="EC7">EN 1997-1 (EC7)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>G (kN)</label>
+                        <input id="loadsG" type="number" step="1" value="15000" />
+                    </div>
+                    <div class="field">
+                        <label>Q long (kN)</label>
+                        <input id="loadsQLong" type="number" step="1" value="4000" />
+                    </div>
+                    <div class="field">
+                        <label>Q short (kN)</label>
+                        <input id="loadsQShort" type="number" step="1" value="2000" />
+                    </div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Design load</div><div class="value" id="loadsDesign">—</div></div>
+                    <div class="result-card"><div class="label">Combination</div><div class="value" id="loadsCombo">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-anchors" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Anchor Check</div>
+                        <div class="panel-subtitle">Tension + shear</div>
+                    </div>
+                    <button class="primary-btn" id="runAnchors">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Bolt diameter (mm)</label><input id="ancD" type="number" step="1" value="20" /></div>
+                    <div class="field"><label>Count</label><input id="ancN" type="number" step="1" value="4" /></div>
+                    <div class="field"><label>f<sub>y</sub> (MPa)</label><input id="ancFy" type="number" step="1" value="400" /></div>
+                    <div class="field"><label>γ<sub>M</sub></label><input id="ancGamma" type="number" step="0.01" value="1.25" /></div>
+                    <div class="field"><label>Tension (kN)</label><input id="ancT" type="number" step="1" value="100" /></div>
+                    <div class="field"><label>Shear (kN)</label><input id="ancV" type="number" step="1" value="50" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Tension capacity</div><div class="value" id="ancNrd">—</div></div>
+                    <div class="result-card"><div class="label">Shear capacity</div><div class="value" id="ancVrd">—</div></div>
+                    <div class="result-card"><div class="label">Utilization</div><div class="value" id="ancUtil">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="ancOK">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-deflection" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Deflection Check</div>
+                        <div class="panel-subtitle">Simply supported, UDL</div>
+                    </div>
+                    <button class="primary-btn" id="runDeflection">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Span (m)</label><input id="defL" type="number" step="0.1" value="6" /></div>
+                    <div class="field"><label>UDL (kN/m)</label><input id="defW" type="number" step="0.1" value="20" /></div>
+                    <div class="field"><label>E (GPa)</label><input id="defE" type="number" step="1" value="200" /></div>
+                    <div class="field"><label>Width (m)</label><input id="defB" type="number" step="0.01" value="0.3" /></div>
+                    <div class="field"><label>Height (m)</label><input id="defH" type="number" step="0.01" value="0.5" /></div>
+                    <div class="field"><label>Limit (L/)</label><input id="defLim" type="number" step="1" value="250" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Deflection</div><div class="value" id="defValue">—</div></div>
+                    <div class="result-card"><div class="label">Limit</div><div class="value" id="defLimit">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="defOK">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-joints" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Weld Check</div>
+                        <div class="panel-subtitle">Fillet weld shear</div>
+                    </div>
+                    <button class="primary-btn" id="runJoints">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Weld size (mm)</label><input id="jSize" type="number" step="1" value="6" /></div>
+                    <div class="field"><label>Weld length (mm)</label><input id="jLen" type="number" step="1" value="200" /></div>
+                    <div class="field"><label>f<sub>vw</sub> (MPa)</label><input id="jFvw" type="number" step="1" value="180" /></div>
+                    <div class="field"><label>γ<sub>M</sub></label><input id="jGamma" type="number" step="0.01" value="1.25" /></div>
+                    <div class="field"><label>Shear (kN)</label><input id="jV" type="number" step="1" value="60" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Capacity</div><div class="value" id="jCap">—</div></div>
+                    <div class="result-card"><div class="label">Utilization</div><div class="value" id="jUtil">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="jOK">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-report" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">PDF Report</div>
+                        <div class="panel-subtitle">Simple project report</div>
+                    </div>
+                    <button class="primary-btn" id="runReport">Generate PDF</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Project</label><input id="repProject" type="text" value="Project A" /></div>
+                    <div class="field"><label>Author</label><input id="repAuthor" type="text" value="Engineer" /></div>
+                    <div class="field"><label>Title</label><input id="repTitle" type="text" value="Engineering Report" /></div>
+                    <div class="field" style="grid-column: 1 / -1;">
+                        <label>Notes</label>
+                        <textarea id="repNotes">Calculation summary and conclusions.</textarea>
+                    </div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Status</div><div class="value" id="repStatus">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-column" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Column Stability</div>
+                        <div class="panel-subtitle">Euler buckling</div>
+                    </div>
+                    <button class="primary-btn" id="runColumn">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Length (m)</label><input id="colL" type="number" step="0.1" value="3" /></div>
+                    <div class="field"><label>k-factor</label><input id="colK" type="number" step="0.1" value="1" /></div>
+                    <div class="field"><label>Width (m)</label><input id="colB" type="number" step="0.01" value="0.3" /></div>
+                    <div class="field"><label>Height (m)</label><input id="colH" type="number" step="0.01" value="0.3" /></div>
+                    <div class="field"><label>E (GPa)</label><input id="colE" type="number" step="1" value="200" /></div>
+                    <div class="field"><label>Load (kN)</label><input id="colN" type="number" step="1" value="800" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Pcr</div><div class="value" id="colPcr">—</div></div>
+                    <div class="result-card"><div class="label">Utilization</div><div class="value" id="colUtil">—</div></div>
+                    <div class="result-card"><div class="label">OK</div><div class="value" id="colOK">—</div></div>
+                </div>
+            </div>
+
+            <div class="tool-panel" id="panel-slab" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Slab Reinforcement</div>
+                        <div class="panel-subtitle">Simple flexural design</div>
+                    </div>
+                    <button class="primary-btn" id="runSlab">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Moment (kN·m/m)</label><input id="slabM" type="number" step="0.1" value="80" /></div>
+                    <div class="field"><label>Effective depth d (mm)</label><input id="slabD" type="number" step="1" value="180" /></div>
+                    <div class="field"><label>f<sub>yd</sub> (MPa)</label><input id="slabFyd" type="number" step="1" value="435" /></div>
+                    <div class="field"><label>Bar diameter (mm)</label><input id="slabBar" type="number" step="1" value="12" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">As required</div><div class="value" id="slabAs">—</div></div>
+                    <div class="result-card"><div class="label">Bar area</div><div class="value" id="slabArea">—</div></div>
+                    <div class="result-card"><div class="label">Spacing</div><div class="value" id="slabSpacing">—</div></div>
+                </div>
+            </div>
+        </main>
+
+        <div class="right">
+            <div class="user-chip">
+                <img id="userAvatar" alt="Avatar" />
+                <div class="user-text">
+                    <div class="login" id="userLogin">@loading</div>
+                    <div class="hint">Profile</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (async () => {
+            try {
+                const res = await fetch('/api/user/profile', { credentials: 'include' });
+                if (res.status === 401) {
+                    window.location.href = '/auth/';
+                    return;
+                }
+                if (!res.ok) return;
+                const user = await res.json();
+                document.getElementById('userLogin').textContent = '@' + user.login;
+                document.getElementById('userAvatar').src =
+                    user.avatar_url || `https://ui-avatars.com/api/?name=${user.login}`;
+            } catch (_) {}
+        })();
+
+        const emptyState = document.getElementById('emptyState');
+        const panels = document.querySelectorAll('.tool-panel');
+        document.querySelectorAll('.tool-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const target = card.getAttribute('data-target');
+                emptyState.style.display = 'none';
+                panels.forEach(p => p.style.display = 'none');
+                const panel = document.getElementById(`panel-${target}`);
+                if (panel) panel.style.display = 'block';
+            });
+        });
+
+        // Piles
+        const layersGrid = document.getElementById('layersGrid');
+        const addLayer = document.getElementById('addLayer');
+        const createLayerRow = (data = {}) => {
+            const row = document.createElement('div');
+            row.className = 'layer-grid';
+            row.innerHTML = `
+                <input type="number" step="0.1" placeholder="From (m)" value="${data.from_depth_m ?? 0}">
+                <input type="number" step="0.1" placeholder="To (m)" value="${data.to_depth_m ?? 3}">
+                <input type="text" placeholder="Soil" value="${data.soil_type ?? 'Sand'}">
+                <input type="number" step="0.1" placeholder="γ (kN/m³)" value="${data.gamma_kn_m3 ?? 18}">
+                <input type="number" step="1" placeholder="fᵢ (kPa)" value="${data.fi_kpa ?? 25}">
+                <div style="display:flex; gap:6px;">
+                    <input type="number" step="0.01" placeholder="α" value="${data.alpha ?? 1}">
+                    <button class="remove-btn">Remove</button>
+                </div>
+            `;
+            row.querySelector('.remove-btn').addEventListener('click', () => row.remove());
+            layersGrid.appendChild(row);
+        };
+        addLayer.addEventListener('click', () => createLayerRow());
+        createLayerRow({ from_depth_m: 0, to_depth_m: 4, soil_type: 'Sand', gamma_kn_m3: 18, fi_kpa: 25, alpha: 1 });
+        createLayerRow({ from_depth_m: 4, to_depth_m: 10, soil_type: 'Clay', gamma_kn_m3: 19, fi_kpa: 35, alpha: 0.7 });
+
+        document.getElementById('runPiles').addEventListener('click', async () => {
+            try {
+                const layers = Array.from(layersGrid.children).map(row => {
+                    const inputs = row.querySelectorAll('input');
+                    return {
+                        from_depth_m: parseFloat(inputs[0].value),
+                        to_depth_m: parseFloat(inputs[1].value),
+                        soil_type: inputs[2].value,
+                        gamma_kn_m3: parseFloat(inputs[3].value),
+                        fi_kpa: parseFloat(inputs[4].value),
+                        alpha: parseFloat(inputs[5].value)
+                    };
+                });
+                const payload = {
+                    method: document.getElementById('method').value,
+                    pile_type: document.getElementById('pileType').value,
+                    side_m: parseFloat(document.getElementById('sideM').value),
+                    diameter_m: parseFloat(document.getElementById('diameterM').value),
+                    length_m: parseFloat(document.getElementById('lengthM').value),
+                    toe_depth_m: parseFloat(document.getElementById('toeDepthM').value),
+                    base_qb_kpa: parseFloat(document.getElementById('baseQb').value),
+                    load_g_kn: parseFloat(document.getElementById('loadG').value),
+                    load_q_long_kn: parseFloat(document.getElementById('loadQLong').value),
+                    load_q_short_kn: parseFloat(document.getElementById('loadQShort').value),
+                    layers
+                };
+                const res = await fetch('/api/user/tools/piles/calc', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+                document.getElementById('avgLoad').textContent = data.average_load_per_pile?.toFixed(2) + ' kN';
+                document.getElementById('pileCount').textContent = data.pile_count ?? '—';
+                document.getElementById('designRes').textContent = data.design_resistance_kn?.toFixed(2) + ' kN';
+                document.getElementById('designLoad').textContent = data.design_load_kn?.toFixed(2) + ' kN';
+                document.getElementById('shaftRes').textContent = data.shaft_resistance_kn?.toFixed(2) + ' kN';
+                document.getElementById('baseRes').textContent = data.base_resistance_kn?.toFixed(2) + ' kN';
+            } catch (_) { alert('Calculation failed'); }
+        });
+
+        // Beam
+        document.getElementById('runBeam').addEventListener('click', async () => {
+            const payload = {
+                material: document.getElementById('beamMaterial').value,
+                fy_mpa: parseFloat(document.getElementById('beamFy').value),
+                e_gpa: parseFloat(document.getElementById('beamE').value),
+                span_m: parseFloat(document.getElementById('beamSpan').value),
+                udl_kn_m: parseFloat(document.getElementById('beamUDL').value),
+                width_m: parseFloat(document.getElementById('beamWidth').value),
+                height_m: parseFloat(document.getElementById('beamHeight').value),
+                deflection_limit_ratio: parseFloat(document.getElementById('beamDefl').value)
+            };
+            const res = await fetch('/api/user/tools/beam/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('beamM').textContent = data.max_moment_knm?.toFixed(2) + ' kN·m';
+            document.getElementById('beamH').textContent = data.required_height_m?.toFixed(3) + ' m';
+            document.getElementById('beamStress').textContent = data.stress_mpa?.toFixed(1) + ' MPa';
+            document.getElementById('beamDeflection').textContent = data.deflection_mm?.toFixed(2) + ' mm';
+            document.getElementById('beamDeflLimit').textContent = data.deflection_limit_mm?.toFixed(2) + ' mm';
+            document.getElementById('beamOK').textContent = data.ok_stress && data.ok_deflection ? 'OK' : 'Fail';
+        });
+
+        // Loads
+        document.getElementById('runLoads').addEventListener('click', async () => {
+            const payload = {
+                method: document.getElementById('loadsMethod').value,
+                load_g_kn: parseFloat(document.getElementById('loadsG').value),
+                load_q_long_kn: parseFloat(document.getElementById('loadsQLong').value),
+                load_q_short_kn: parseFloat(document.getElementById('loadsQShort').value)
+            };
+            const res = await fetch('/api/user/tools/loads/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('loadsDesign').textContent = data.design_load_kn?.toFixed(2) + ' kN';
+            document.getElementById('loadsCombo').textContent = data.combo_name || '—';
+        });
+
+        // Anchors
+        document.getElementById('runAnchors').addEventListener('click', async () => {
+            const payload = {
+                bolt_diameter_mm: parseFloat(document.getElementById('ancD').value),
+                bolt_count: parseInt(document.getElementById('ancN').value, 10),
+                fy_mpa: parseFloat(document.getElementById('ancFy').value),
+                gamma_m: parseFloat(document.getElementById('ancGamma').value),
+                tension_kn: parseFloat(document.getElementById('ancT').value),
+                shear_kn: parseFloat(document.getElementById('ancV').value)
+            };
+            const res = await fetch('/api/user/tools/anchors/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('ancNrd').textContent = data.tension_capacity_kn?.toFixed(2) + ' kN';
+            document.getElementById('ancVrd').textContent = data.shear_capacity_kn?.toFixed(2) + ' kN';
+            document.getElementById('ancUtil').textContent = data.utilization?.toFixed(2);
+            document.getElementById('ancOK').textContent = data.ok ? 'OK' : 'Fail';
+        });
+
+        // Deflection
+        document.getElementById('runDeflection').addEventListener('click', async () => {
+            const payload = {
+                span_m: parseFloat(document.getElementById('defL').value),
+                udl_kn_m: parseFloat(document.getElementById('defW').value),
+                e_gpa: parseFloat(document.getElementById('defE').value),
+                width_m: parseFloat(document.getElementById('defB').value),
+                height_m: parseFloat(document.getElementById('defH').value),
+                deflection_limit_ratio: parseFloat(document.getElementById('defLim').value)
+            };
+            const res = await fetch('/api/user/tools/deflection/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('defValue').textContent = data.deflection_mm?.toFixed(2) + ' mm';
+            document.getElementById('defLimit').textContent = data.deflection_limit_mm?.toFixed(2) + ' mm';
+            document.getElementById('defOK').textContent = data.ok ? 'OK' : 'Fail';
+        });
+
+        // Joints
+        document.getElementById('runJoints').addEventListener('click', async () => {
+            const payload = {
+                weld_size_mm: parseFloat(document.getElementById('jSize').value),
+                weld_length_mm: parseFloat(document.getElementById('jLen').value),
+                fvw_mpa: parseFloat(document.getElementById('jFvw').value),
+                gamma_m: parseFloat(document.getElementById('jGamma').value),
+                shear_kn: parseFloat(document.getElementById('jV').value)
+            };
+            const res = await fetch('/api/user/tools/joints/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('jCap').textContent = data.capacity_kn?.toFixed(2) + ' kN';
+            document.getElementById('jUtil').textContent = data.utilization?.toFixed(2);
+            document.getElementById('jOK').textContent = data.ok ? 'OK' : 'Fail';
+        });
+
+        // Report
+        document.getElementById('runReport').addEventListener('click', async () => {
+            const payload = {
+                project: document.getElementById('repProject').value,
+                author: document.getElementById('repAuthor').value,
+                title: document.getElementById('repTitle').value,
+                notes: document.getElementById('repNotes').value
+            };
+            const res = await fetch('/api/user/tools/report/pdf', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            if (!res.ok) { document.getElementById('repStatus').textContent = 'Error'; return; }
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'report.pdf';
+            a.click();
+            URL.revokeObjectURL(url);
+            document.getElementById('repStatus').textContent = 'Downloaded';
+        });
+
+        // Column
+        document.getElementById('runColumn').addEventListener('click', async () => {
+            const payload = {
+                length_m: parseFloat(document.getElementById('colL').value),
+                k_factor: parseFloat(document.getElementById('colK').value),
+                width_m: parseFloat(document.getElementById('colB').value),
+                height_m: parseFloat(document.getElementById('colH').value),
+                e_gpa: parseFloat(document.getElementById('colE').value),
+                load_kn: parseFloat(document.getElementById('colN').value)
+            };
+            const res = await fetch('/api/user/tools/column/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('colPcr').textContent = data.pcr_kn?.toFixed(2) + ' kN';
+            document.getElementById('colUtil').textContent = data.utilization?.toFixed(2);
+            document.getElementById('colOK').textContent = data.ok ? 'OK' : 'Fail';
+        });
+
+        // Slab
+        document.getElementById('runSlab').addEventListener('click', async () => {
+            const payload = {
+                moment_knm_per_m: parseFloat(document.getElementById('slabM').value),
+                effective_depth_mm: parseFloat(document.getElementById('slabD').value),
+                fyd_mpa: parseFloat(document.getElementById('slabFyd').value),
+                bar_diameter_mm: parseFloat(document.getElementById('slabBar').value)
+            };
+            const res = await fetch('/api/user/tools/slab/calc', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            const data = await res.json();
+            document.getElementById('slabAs').textContent = data.as_required_mm2_per_m?.toFixed(1) + ' mm²/m';
+            document.getElementById('slabArea').textContent = data.bar_area_mm2?.toFixed(1) + ' mm²';
+            document.getElementById('slabSpacing').textContent = data.spacing_mm?.toFixed(0) + ' mm';
+        });
+    </script>
 </body>
 </html>

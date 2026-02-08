@@ -2,6 +2,15 @@ package main
 
 import (
 	auth "Vertex/internal/auth"
+	piles "Vertex/internal/calc/piles"
+	beam "Vertex/internal/calc/beam"
+	anchors "Vertex/internal/calc/anchors"
+	column "Vertex/internal/calc/column"
+	deflection "Vertex/internal/calc/deflection"
+	joints "Vertex/internal/calc/joints"
+	loads "Vertex/internal/calc/loads"
+	report "Vertex/internal/calc/report"
+	slab "Vertex/internal/calc/slab"
 	profile "Vertex/internal/profile"
 	repo "Vertex/internal/repo"
 	"context"
@@ -67,6 +76,27 @@ func HandleList(mux *mux.Router, db *sql.DB) {
 	secureApi.HandleFunc("/profile", profileH.UpdateProfile).Methods("PATCH", "PUT")
 	secureApi.HandleFunc("/profile/{id:[0-9]+}", profileH.GetProfile).Methods("GET")
 	secureApi.HandleFunc("/upload-avatar", profileH.UploadAvatar).Methods("POST")
+
+	pilesH := &piles.Handler{}
+	secureApi.HandleFunc("/tools/piles/calc", pilesH.Calc).Methods("POST")
+
+	beamH := &beam.Handler{}
+	anchorsH := &anchors.Handler{}
+	columnH := &column.Handler{}
+	deflectionH := &deflection.Handler{}
+	jointsH := &joints.Handler{}
+	loadsH := &loads.Handler{}
+	reportH := &report.Handler{}
+	slabH := &slab.Handler{}
+
+	secureApi.HandleFunc("/tools/beam/calc", beamH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools/loads/calc", loadsH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools/anchors/calc", anchorsH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools/deflection/calc", deflectionH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools/joints/calc", jointsH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools/report/pdf", reportH.Generate).Methods("POST")
+	secureApi.HandleFunc("/tools/column/calc", columnH.Calc).Methods("POST")
+	secureApi.HandleFunc("/tools/slab/calc", slabH.Calc).Methods("POST")
 
 	mux.PathPrefix("/uploads/").
 		Handler(http.StripPrefix("/uploads/", http.FileServer(http.Dir("./static/uploads/"))))
