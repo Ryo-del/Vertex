@@ -535,6 +535,7 @@ premiumApi := secureApi.PathPrefix("/tools-sp").Subrouter()
 
 }
 func main() {
+	_ = godotenv.Load()
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
