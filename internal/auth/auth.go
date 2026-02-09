@@ -189,7 +189,7 @@ func (env *Authenv) addCookie(w http.ResponseWriter, userID int, login string) {
 func InitDB() *sql.DB {
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
-		connStr = "user=postgres dbname=postgres password=password sslmode=disable"
+		connStr = "user=postgres dbname=railway password=VZlIvqgAWsIHGrNTmhwhgMiqfUzLqVuq sslmode=disable"
 	}
 	if !strings.Contains(connStr, "sslmode=") {
 		if strings.HasPrefix(connStr, "postgres://") || strings.HasPrefix(connStr, "postgresql://") {
