@@ -548,20 +548,24 @@ func main() {
 			log.SetOutput(io.MultiWriter(os.Stdout, f))
 		}
 	}
-	log.Println("Starting server on :443")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Printf("Starting server on :%s", port)
 	HandleList(mux, db)
 	startTelegramBot(repo.NewPostgresUserDB(db))
 	handler := CORS(mux)
 
 	server := &http.Server{
-		Addr:    ":443",
+		Addr:    ":" + port,
 		Handler: handler,
 	}
 
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		if err := server.ListenAndServeTLS("server.crt", "server.key"); err != nil && err != http.ErrServerClosed {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Printf("Server error: %v", err)
 		}
 	}()
