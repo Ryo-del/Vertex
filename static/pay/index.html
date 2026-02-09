@@ -77,6 +77,9 @@
       min-height: 320px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.35);
     }
+    .warning {
+      color: red
+    }
     .qr img {
       width: min(260px, 70vw);
       height: auto;
@@ -104,7 +107,9 @@
   </style>
 </head>
 <body>
+  
   <div class="wrap">
+    
     <div class="card">
       <div class="title">Premium доступ</div>
     <div class="subtitle">Открывает инструменты СП на 1 месяц</div> 
@@ -119,10 +124,14 @@
     </div>
     <div class="qr">
       <img src="/qr/qr.png" alt="QR" />
-      <div class="hint">Отсканируйте QR и оплатите. После оплаты нажмите «Я оплатил».</div>
+      <div class="hint">Отсканируйте QR и оплатите. После оплаты нажмите «Я оплатил».
+      </div>
     </div>
   </div>
-
+  <div class="warning">
+    Покупка Premium станет доступна в бета-версии.<br>
+    Чтобы получить доступ просто нажмите «Я оплатил»
+  </div>
   <script>
     document.getElementById('paidBtn').addEventListener('click', async () => {
       const res = await fetch('/api/user/premium/request', { method: 'POST', credentials: 'include' });

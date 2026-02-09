@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -206,6 +207,16 @@ func (env *Authenv) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
 		return
 	}
+	req.Login = strings.TrimSpace(req.Login)
+	req.Email = strings.TrimSpace(req.Email)
+	if req.Login == "" || req.Email == "" || req.Password == "" {
+		http.Error(w, "Login, email and password required", http.StatusBadRequest)
+		return
+	}
+	if len(req.Password) < 6 {
+		http.Error(w, "Password too короткий", http.StatusBadRequest)
+		return
+	}
 
 	hashedPassword, err := HashPassword(req.Password)
 	if err != nil {
@@ -231,6 +242,11 @@ func (env *Authenv) AuthHandler(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		http.Error(w, "Invalid request payload", http.StatusBadRequest)
+		return
+	}
+	req.Login = strings.TrimSpace(req.Login)
+	if req.Login == "" || req.Password == "" {
+		http.Error(w, "Login and password required", http.StatusBadRequest)
 		return
 	}
 

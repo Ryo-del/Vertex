@@ -444,7 +444,8 @@
                 <span class="tool-emoji">🧱</span>
                 <span>Подбор арматуры плиты</span>
             </div>
-            <hr class="divider">
+            
+<hr class="divider">
             <div class="tool-card" data-target="piles-sp" data-premium="true">
                 <span class="tool-emoji">📊</span>
                 <span>Свайный фундамент (СП)</span><span class="lock-badge">🔒</span>
@@ -480,6 +481,28 @@
             <div class="tool-card" data-target="report-sp" data-premium="true">
                 <span class="tool-emoji">📝</span>
                 <span>Отчёт (СП)</span><span class="lock-badge">🔒</span>
+            </div>
+            <hr class="divider">
+
+ <div class="tool-card" data-target="batch" data-premium="true">
+                <span class="tool-emoji">🧾</span>
+                <span>Пакетный расчет (балки)</span>
+                <span class="lock-badge">🔒</span>
+            </div>
+            <div class="tool-card" data-target="auto" data-premium="true">
+                <span class="tool-emoji">⚙️</span>
+                <span>Автоподбор балки</span>
+                <span class="lock-badge">🔒</span>
+            </div>
+            <div class="tool-card" data-target="recommend" data-premium="true">
+                <span class="tool-emoji">💡</span>
+                <span>Рекомендация шва</span>
+                <span class="lock-badge">🔒</span>
+            </div>
+            <div class="tool-card" data-target="import" data-premium="true">
+                <span class="tool-emoji">📥</span>
+                <span>Импорт из Excel</span>
+                <span class="lock-badge">🔒</span>
             </div>
             <hr class="divider">
             <div class="tool-card" data-target="info">
@@ -1049,6 +1072,86 @@
                 <div class="panel-grid" id="docsList"></div>
             </div>
 
+            <div class="tool-panel" id="panel-batch" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Batch Beam Check</div>
+                        <div class="panel-subtitle">CSV: material,span,udl,width,height(optional),fy,e,defl</div>
+                    </div>
+                    <button class="primary-btn" id="runBatch">Calculate</button>
+                </div>
+                <div class="field">
+                    <label>CSV input</label>
+                    <textarea id="batchInput" rows="6" placeholder="steel,6,20,0.3,0.5,235,200,250
+rc,5,12,0.3,,14,30,250"></textarea>
+                </div>
+                <div class="panel-grid" id="batchOutput"></div>
+                <div class="field" id="batchStatus" style="margin-top:8px; font-size:12px; color:#6e6e73;"></div>
+            </div>
+
+            <div class="tool-panel" id="panel-auto" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Auto Beam Design</div>
+                        <div class="panel-subtitle">Auto-select height</div>
+                    </div>
+                    <button class="primary-btn" id="runAuto">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Material</label><select id="autoMat"><option value="steel">Steel</option><option value="rc">RC</option></select></div>
+                    <div class="field"><label>Span (m)</label><input id="autoSpan" type="number" step="0.1" value="6" /></div>
+                    <div class="field"><label>UDL (kN/m)</label><input id="autoUDL" type="number" step="0.1" value="20" /></div>
+                    <div class="field"><label>Width (m)</label><input id="autoWidth" type="number" step="0.01" value="0.3" /></div>
+                    <div class="field"><label>fy (MPa)</label><input id="autoFy" type="number" step="1" value="235" /></div>
+                    <div class="field"><label>E (GPa)</label><input id="autoE" type="number" step="1" value="200" /></div>
+                    <div class="field"><label>Defl L/</label><input id="autoDefl" type="number" step="1" value="250" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Height</div><div class="value" id="autoH">—</div></div>
+                    <div class="result-card"><div class="label">Stress</div><div class="value" id="autoStress">—</div></div>
+                    <div class="result-card"><div class="label">Deflection</div><div class="value" id="autoDef">—</div></div>
+                </div>
+                <div class="field" id="autoStatus" style="margin-top:8px; font-size:12px; color:#6e6e73;"></div>
+            </div>
+
+            <div class="tool-panel" id="panel-recommend" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Weld Recommendation</div>
+                        <div class="panel-subtitle">Required fillet size</div>
+                    </div>
+                    <button class="primary-btn" id="runRec">Calculate</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field"><label>Shear (kN)</label><input id="recV" type="number" step="1" value="60" /></div>
+                    <div class="field"><label>Length (mm)</label><input id="recL" type="number" step="1" value="200" /></div>
+                    <div class="field"><label>fvw (MPa)</label><input id="recF" type="number" step="1" value="180" /></div>
+                    <div class="field"><label>γM</label><input id="recG" type="number" step="0.01" value="1.25" /></div>
+                </div>
+                <div class="panel-grid">
+                    <div class="result-card"><div class="label">Required size</div><div class="value" id="recS">—</div></div>
+                </div>
+                <div class="field" id="recStatus" style="margin-top:8px; font-size:12px; color:#6e6e73;"></div>
+            </div>
+
+            <div class="tool-panel" id="panel-import" style="display:none;">
+                <div class="panel-header">
+                    <div>
+                        <div class="panel-title">Excel Import (Beam)</div>
+                        <div class="panel-subtitle">Upload .xlsx</div>
+                    </div>
+                    <button class="primary-btn" id="runImport">Upload</button>
+                </div>
+                <div class="form-grid">
+                    <div class="field" style="grid-column: 1 / -1;">
+                        <label>File</label>
+                        <input id="importFile" type="file" accept=".xlsx" />
+                    </div>
+                </div>
+                <div class="panel-grid" id="importOutput"></div>
+                <div class="field" id="importStatus" style="margin-top:8px; font-size:12px; color:#6e6e73;"></div>
+            </div>
+
         </main>
 
         <div class="right ">
@@ -1588,6 +1691,153 @@ document.querySelectorAll('.tool-card').forEach(card => {
             buyPremium.addEventListener('click', async () => {
                 if (isPremium) return;
                 window.location.href = '/pay/';
+            });
+        }
+
+        // Premium tools handlers
+        const runBatch = document.getElementById('runBatch');
+        if (runBatch) {
+            runBatch.addEventListener('click', async () => {
+                const status = document.getElementById('batchStatus');
+                if (status) status.textContent = '';
+                try {
+                    const rows = document.getElementById('batchInput').value.trim().split(/\n+/).filter(Boolean);
+                    const items = rows.map(line => {
+                        const parts = line.split(',').map(s => s.trim());
+                        return {
+                            material: parts[0] || 'steel',
+                            span_m: parseFloat(parts[1] || 0),
+                            udl_kn_m: parseFloat(parts[2] || 0),
+                            width_m: parseFloat(parts[3] || 0),
+                            height_m: parseFloat(parts[4] || 0),
+                            fy_mpa: parseFloat(parts[5] || 0),
+                            e_gpa: parseFloat(parts[6] || 0),
+                            deflection_limit_ratio: parseFloat(parts[7] || 250)
+                        };
+                    });
+                    const res = await fetch('/api/user/premium-tools/batch/beam', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ items })
+                    });
+                    if (!res.ok) {
+                        const t = await res.text();
+                        if (status) status.textContent = `Error: ${res.status} ${t}`;
+                        return;
+                    }
+                    const data = await res.json();
+                    const out = document.getElementById('batchOutput');
+                    out.innerHTML = '';
+                    (data.results || []).forEach((r, i) => {
+                        const card = document.createElement('div');
+                        card.className = 'result-card';
+                        card.innerHTML = `<div class="label">#${i+1} h=${r.required_height_m?.toFixed(3)}m, σ=${r.stress_mpa?.toFixed(1)}MPa</div>`;
+                        out.appendChild(card);
+                    });
+                    if (status) status.textContent = `Rows: ${data.results?.length || 0}`;
+                } catch (_) {
+                    if (status) status.textContent = 'Unexpected error';
+                }
+            });
+        }
+
+        const runAuto = document.getElementById('runAuto');
+        if (runAuto) {
+            runAuto.addEventListener('click', async () => {
+                const status = document.getElementById('autoStatus');
+                if (status) status.textContent = '';
+                try {
+                    const payload = {
+                        material: document.getElementById('autoMat').value,
+                        span_m: parseFloat(document.getElementById('autoSpan').value),
+                        udl_kn_m: parseFloat(document.getElementById('autoUDL').value),
+                        width_m: parseFloat(document.getElementById('autoWidth').value),
+                        fy_mpa: parseFloat(document.getElementById('autoFy').value),
+                        e_gpa: parseFloat(document.getElementById('autoE').value),
+                        deflection_limit_ratio: parseFloat(document.getElementById('autoDefl').value)
+                    };
+                    const res = await fetch('/api/user/premium-tools/auto/beam', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) {
+                        const t = await res.text();
+                        if (status) status.textContent = `Error: ${res.status} ${t}`;
+                        return;
+                    }
+                    const data = await res.json();
+                    document.getElementById('autoH').textContent = data.required_height_m?.toFixed(3) + ' m';
+                    document.getElementById('autoStress').textContent = data.stress_mpa?.toFixed(1) + ' MPa';
+                    document.getElementById('autoDef').textContent = data.deflection_mm?.toFixed(2) + ' mm';
+                } catch (_) {
+                    if (status) status.textContent = 'Unexpected error';
+                }
+            });
+        }
+
+        const runRec = document.getElementById('runRec');
+        if (runRec) {
+            runRec.addEventListener('click', async () => {
+                const status = document.getElementById('recStatus');
+                if (status) status.textContent = '';
+                try {
+                    const payload = {
+                        shear_kn: parseFloat(document.getElementById('recV').value),
+                        weld_length_mm: parseFloat(document.getElementById('recL').value),
+                        fvw_mpa: parseFloat(document.getElementById('recF').value),
+                        gamma_m: parseFloat(document.getElementById('recG').value)
+                    };
+                    const res = await fetch('/api/user/premium-tools/recommend/weld', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!res.ok) {
+                        const t = await res.text();
+                        if (status) status.textContent = `Error: ${res.status} ${t}`;
+                        return;
+                    }
+                    const data = await res.json();
+                    document.getElementById('recS').textContent = data.required_size_mm?.toFixed(1) + ' mm';
+                } catch (_) {
+                    if (status) status.textContent = 'Unexpected error';
+                }
+            });
+        }
+
+        const runImport = document.getElementById('runImport');
+        if (runImport) {
+            runImport.addEventListener('click', async () => {
+                const status = document.getElementById('importStatus');
+                if (status) status.textContent = '';
+                try {
+                    const file = document.getElementById('importFile').files[0];
+                    if (!file) return alert('Select file');
+                    const fd = new FormData();
+                    fd.append('file', file);
+                    const res = await fetch('/api/user/premium-tools/import/beam', { method: 'POST', credentials: 'include', body: fd });
+                    if (!res.ok) {
+                        const t = await res.text();
+                        if (status) status.textContent = `Error: ${res.status} ${t}`;
+                        return;
+                    }
+                    const data = await res.json();
+                    const out = document.getElementById('importOutput');
+                    out.innerHTML = '';
+                    (data.results || []).forEach((r, i) => {
+                        const card = document.createElement('div');
+                        card.className = 'result-card';
+                        card.innerHTML = `<div class="label">#${i+1} h=${r.required_height_m?.toFixed(3)}m, σ=${r.stress_mpa?.toFixed(1)}MPa</div>`;
+                        out.appendChild(card);
+                    });
+                    if (status) status.textContent = `Rows: ${data.results?.length || 0}`;
+                } catch (_) {
+                    if (status) status.textContent = 'Unexpected error';
+                }
             });
         }
 

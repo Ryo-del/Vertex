@@ -21,22 +21,31 @@ import (
 	report "Vertex/internal/calc/report"
 	slab "Vertex/internal/calc/slab"
 	pay "Vertex/internal/pay"
+	pbatch "Vertex/internal/calc/premium/batch"
+	pauto "Vertex/internal/calc/premium/autodesign"
+	preco "Vertex/internal/calc/premium/recommend"
+	pimport "Vertex/internal/calc/premium/importer"
 	profile "Vertex/internal/profile"
 	repo "Vertex/internal/repo"
 	"context"
 	"database/sql"
 
+	"io"
+	"mime/multipart"
 	"encoding/json"
+	"bytes"
 	"fmt"
 	"io/fs"
 	"os/signal"
 	"sync"
 	"syscall"
 	"time"
+	"strconv"
 
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
@@ -87,6 +96,177 @@ func premiumMiddleware(repo repo.Repository) mux.MiddlewareFunc {
 	}
 }
 
+func sendTelegramTicket(token string, peerID int64, text string, ticketID int) error {
+	url := "https://api.telegram.org/bot" + token + "/sendMessage"
+	payload := map[string]any{
+		"chat_id": peerID,
+		"text":    text,
+		"reply_markup": map[string]any{
+			"inline_keyboard": [][]map[string]string{
+				{
+					{"text": "✅ Подтвердить", "callback_data": fmt.Sprintf("approve:%d", ticketID)},
+					{"text": "❌ Отклонить", "callback_data": fmt.Sprintf("reject:%d", ticketID)},
+				},
+			},
+		},
+	}
+	b, _ := json.Marshal(payload)
+	_, err := http.Post(url, "application/json", bytes.NewReader(b))
+	return err
+}
+
+type tgUpdate struct {
+	UpdateID      int               `json:"update_id"`
+	CallbackQuery *tgCallbackQuery  `json:"callback_query"`
+	Message       *tgMessage        `json:"message"`
+}
+
+type tgCallbackQuery struct {
+	ID      string     `json:"id"`
+	Data    string     `json:"data"`
+	Message *tgMessage `json:"message"`
+}
+
+type tgMessage struct {
+	MessageID int    `json:"message_id"`
+	Chat      tgChat `json:"chat"`
+	Text      string `json:"text"`
+}
+
+type tgChat struct {
+	ID int64 `json:"id"`
+}
+
+type tgUpdateResponse struct {
+	OK     bool       `json:"ok"`
+	Result []tgUpdate `json:"result"`
+}
+
+func startTelegramBot(repo repo.Repository) {
+	token := os.Getenv("TOKEN_BOT")
+	peerStr := os.Getenv("ADMIN_PEER_ID")
+	if token == "" || peerStr == "" {
+		log.Println("TG bot disabled: TOKEN_BOT or ADMIN_PEER_ID missing")
+		return
+	}
+	adminID, _ := strconv.ParseInt(peerStr, 10, 64)
+	offset := 0
+
+	go func() {
+		for {
+			updates, err := tgGetUpdates(token, offset)
+			if err != nil {
+				log.Println("TG getUpdates error:", err)
+				time.Sleep(2 * time.Second)
+				continue
+			}
+			for _, u := range updates {
+				offset = u.UpdateID + 1
+				if u.CallbackQuery != nil {
+					handleTGCallback(token, adminID, repo, u.CallbackQuery)
+				}
+				if u.Message != nil {
+					handleTGMessage(token, adminID, u.Message)
+				}
+			}
+			time.Sleep(1 * time.Second)
+		}
+	}()
+}
+
+
+func handleTGMessage(token string, adminID int64, msg *tgMessage) {
+	if msg.Chat.ID != adminID {
+		return
+	}
+	if strings.TrimSpace(msg.Text) == "/log" {
+		sendLogFile(token, adminID)
+	}
+}
+
+func sendLogFile(token string, chatID int64) {
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendDocument", token)
+	filePath := "./logs/app.log"
+	file, err := os.Open(filePath)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	var b bytes.Buffer
+	writer := multipart.NewWriter(&b)
+	_ = writer.WriteField("chat_id", fmt.Sprintf("%d", chatID))
+	part, _ := writer.CreateFormFile("document", "app.log")
+	_, _ = io.Copy(part, file)
+	writer.Close()
+	req, _ := http.NewRequest("POST", url, &b)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	_, _ = http.DefaultClient.Do(req)
+}
+
+func tgGetUpdates(token string, offset int) ([]tgUpdate, error) {
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/getUpdates?timeout=20&offset=%d", token, offset)
+	res, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+	var out tgUpdateResponse
+	if err := json.NewDecoder(res.Body).Decode(&out); err != nil {
+		return nil, err
+	}
+	return out.Result, nil
+}
+
+func handleTGCallback(token string, adminID int64, repo repo.Repository, cb *tgCallbackQuery) {
+	if cb.Message == nil || cb.Message.Chat.ID != adminID {
+		tgAnswerCallback(token, cb.ID, "Not allowed")
+		return
+	}
+	parts := strings.Split(cb.Data, ":")
+	if len(parts) != 2 {
+		tgAnswerCallback(token, cb.ID, "Bad data")
+		return
+	}
+	action := parts[0]
+	id, _ := strconv.Atoi(parts[1])
+	ticket, err := repo.GetPremiumTicket(context.Background(), id)
+	if err != nil {
+		tgAnswerCallback(token, cb.ID, "Ticket not found")
+		return
+	}
+	switch action {
+	case "approve":
+		_ = repo.UpdatePremiumTicketStatus(context.Background(), id, "approved")
+		until := time.Now().Add(30 * 24 * time.Hour)
+		_ = repo.SetPremiumUntil(context.Background(), ticket.UserID, until)
+		tgAnswerCallback(token, cb.ID, "Approved")
+		tgEditMessage(token, cb.Message.Chat.ID, cb.Message.MessageID, fmt.Sprintf("✅ Approved ticket #%d", id))
+	case "reject":
+		_ = repo.UpdatePremiumTicketStatus(context.Background(), id, "rejected")
+		tgAnswerCallback(token, cb.ID, "Rejected")
+		tgEditMessage(token, cb.Message.Chat.ID, cb.Message.MessageID, fmt.Sprintf("❌ Rejected ticket #%d", id))
+	default:
+		tgAnswerCallback(token, cb.ID, "Unknown action")
+	}
+}
+
+func tgAnswerCallback(token, id, text string) {
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/answerCallbackQuery", token)
+	payload := map[string]any{"callback_query_id": id, "text": text}
+	b, _ := json.Marshal(payload)
+	_, _ = http.Post(url, "application/json", bytes.NewReader(b))
+}
+
+func tgEditMessage(token string, chatID int64, messageID int, text string) {
+	url := fmt.Sprintf("https://api.telegram.org/bot%s/editMessageText", token)
+	payload := map[string]any{
+		"chat_id":    chatID,
+		"message_id": messageID,
+		"text":       text,
+	}
+	b, _ := json.Marshal(payload)
+	_, _ = http.Post(url, "application/json", bytes.NewReader(b))
+}
 func HandleList(mux *mux.Router, db *sql.DB) {
 	userRepo := repo.NewPostgresUserDB(db)
 	err := godotenv.Load()
@@ -198,7 +378,7 @@ func HandleList(mux *mux.Router, db *sql.DB) {
 		})
 	}).Methods("GET")
 
-	secureApi.HandleFunc("/premium/request", func(w http.ResponseWriter, r *http.Request) {
+		secureApi.HandleFunc("/premium/request", func(w http.ResponseWriter, r *http.Request) {
 		userIDVal := r.Context().Value("userID")
 		userID, ok := userIDVal.(int)
 		if !ok || userID == 0 {
@@ -210,11 +390,17 @@ func HandleList(mux *mux.Router, db *sql.DB) {
 			http.Error(w, "DB error", http.StatusInternalServerError)
 			return
 		}
-		line := fmt.Sprintf("%s | user_id=%d | login=%s | email=%s\n", time.Now().Format(time.RFC3339), userID, prof.Login, prof.Email)
-		f, err := os.OpenFile("./admin/tikets/premium_requests.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err == nil {
-			_, _ = f.WriteString(line)
-			_ = f.Close()
+		ticketID, err := userRepo.CreatePremiumTicket(r.Context(), userID, prof.Login, prof.Email)
+		if err != nil {
+			http.Error(w, "DB error", http.StatusInternalServerError)
+			return
+		}
+		botToken := os.Getenv("TOKEN_BOT")
+		peerStr := os.Getenv("ADMIN_PEER_ID")
+		if botToken != "" && peerStr != "" {
+			peerID, _ := strconv.ParseInt(peerStr, 10, 64)
+			msg := fmt.Sprintf("Тикет на оплату:\n\nid: %d\nlogin: %s\nemail: %s\n\nticket_id: %d\nTime: %s", userID, prof.Login, prof.Email, ticketID, time.Now().Format("02.01.2006 : 15:04"))
+			_ = sendTelegramTicket(botToken, peerID, msg, ticketID)
 		}
 		w.WriteHeader(http.StatusOK)
 	}).Methods("POST")
@@ -249,7 +435,26 @@ func HandleList(mux *mux.Router, db *sql.DB) {
 	secureApi.HandleFunc("/tools/column/calc", columnH.Calc).Methods("POST")
 	secureApi.HandleFunc("/tools/slab/calc", slabH.Calc).Methods("POST")
 
-	premiumApi := secureApi.PathPrefix("/tools-sp").Subrouter()
+	
+	// Premium tools (extra)
+	premiumTools := secureApi.PathPrefix("/premium-tools").Subrouter()
+	premiumTools.Use(premiumMiddleware(userRepo))
+	premiumTools.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			log.Printf("PREMIUM tools request: %s %s", r.Method, r.URL.Path)
+			next.ServeHTTP(w, r)
+		})
+	})
+	batchH := &pbatch.Handler{}
+	autoH := &pauto.Handler{}
+	recH := &preco.Handler{}
+	impH := &pimport.Handler{}
+	premiumTools.HandleFunc("/batch/beam", batchH.Beam).Methods("POST")
+	premiumTools.HandleFunc("/auto/beam", autoH.Beam).Methods("POST")
+	premiumTools.HandleFunc("/recommend/weld", recH.Weld).Methods("POST")
+	premiumTools.HandleFunc("/import/beam", impH.Beam).Methods("POST")
+
+premiumApi := secureApi.PathPrefix("/tools-sp").Subrouter()
 	premiumApi.Use(premiumMiddleware(userRepo))
 	premiumApi.HandleFunc("/piles/calc", pilesSpH.Calc).Methods("POST")
 	premiumApi.HandleFunc("/beam/calc", beamSpH.Calc).Methods("POST")
@@ -336,8 +541,15 @@ func main() {
 	db := auth.InitDB()
 	defer db.Close()
 	mux := mux.NewRouter()
+	// Logging to file + stdout
+	if err := os.MkdirAll("./logs", 0755); err == nil {
+		if f, err := os.OpenFile("./logs/app.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644); err == nil {
+			log.SetOutput(io.MultiWriter(os.Stdout, f))
+		}
+	}
 	log.Println("Starting server on :443")
 	HandleList(mux, db)
+	startTelegramBot(repo.NewPostgresUserDB(db))
 	handler := CORS(mux)
 
 	server := &http.Server{

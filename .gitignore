@@ -1,0 +1,30 @@
+# Go
+/bin/
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Env
+.env
+
+# Logs
+/logs/
+*.log
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+
+# Certificates
+server.key
+server.crt
+
+# Uploads
+/static/uploads/
+
+# Misc
+*.tmp

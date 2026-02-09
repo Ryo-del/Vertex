@@ -17,6 +17,9 @@ type Repository interface {
 	SetPremiumUntil(ctx context.Context, userID int, until time.Time) error
 	GetPremiumUntil(ctx context.Context, userID int) (*time.Time, error)
 	ClearPremium(ctx context.Context, userID int) error
+	CreatePremiumTicket(ctx context.Context, userID int, login, email string) (int, error)
+	UpdatePremiumTicketStatus(ctx context.Context, id int, status string) error
+	GetPremiumTicket(ctx context.Context, id int) (*PremiumTicket, error)
 }
 
 type Profile struct {
@@ -26,6 +29,15 @@ type Profile struct {
 	AvatarURL   string `json:"avatar_url"`
 	IsPremium   bool   `json:"is_premium"`
 	PremiumUntil *time.Time `json:"premium_until"`
+}
+
+type PremiumTicket struct {
+	ID        int
+	UserID    int
+	Login     string
+	Email     string
+	Status    string
+	CreatedAt time.Time
 }
 
 type PostgresUserRepository struct {
@@ -162,4 +174,28 @@ func (r *PostgresUserRepository) GetPremiumUntil(ctx context.Context, userID int
 func (r *PostgresUserRepository) ClearPremium(ctx context.Context, userID int) error {
 	_, err := r.db.ExecContext(ctx, `UPDATE profile SET is_premium = false, premium_until = NULL WHERE user_id = $1`, userID)
 	return err
+}
+
+func (r *PostgresUserRepository) CreatePremiumTicket(ctx context.Context, userID int, login, email string) (int, error) {
+	var id int
+	err := r.db.QueryRowContext(ctx, `
+		INSERT INTO premium_tickets (user_id, login, email, status)
+		VALUES ($1, $2, $3, 'pending')
+		RETURNING id
+	`, userID, login, email).Scan(&id)
+	return id, err
+}
+
+func (r *PostgresUserRepository) UpdatePremiumTicketStatus(ctx context.Context, id int, status string) error {
+	_, err := r.db.ExecContext(ctx, `UPDATE premium_tickets SET status = $1, updated_at = NOW() WHERE id = $2`, status, id)
+	return err
+}
+
+func (r *PostgresUserRepository) GetPremiumTicket(ctx context.Context, id int) (*PremiumTicket, error) {
+	t := &PremiumTicket{}
+	err := r.db.QueryRowContext(ctx, `
+		SELECT id, user_id, login, email, status, created_at
+		FROM premium_tickets WHERE id = $1
+	`, id).Scan(&t.ID, &t.UserID, &t.Login, &t.Email, &t.Status, &t.CreatedAt)
+	return t, err
 }
