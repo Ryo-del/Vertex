@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -186,7 +187,17 @@ func (env *Authenv) addCookie(w http.ResponseWriter, userID int, login string) {
 	http.SetCookie(w, &cookie)
 }
 func InitDB() *sql.DB {
-	connStr := "user=postgres dbname=postgres password=password sslmode=disable"
+	connStr := os.Getenv("DATABASE_URL")
+	if connStr == "" {
+		connStr = "user=postgres dbname=postgres password=password sslmode=disable"
+	}
+	if !strings.Contains(connStr, "sslmode=") {
+		if strings.HasPrefix(connStr, "postgres://") || strings.HasPrefix(connStr, "postgresql://") {
+			connStr = connStr + "?sslmode=require"
+		} else {
+			connStr = connStr + " sslmode=require"
+		}
+	}
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Ошибка конфигурации БД:", err)
