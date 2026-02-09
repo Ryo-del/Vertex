@@ -531,7 +531,7 @@ premiumApi := secureApi.PathPrefix("/tools-sp").Subrouter()
 		Handler(authEnv.AuthMiddleware(http.StripPrefix("/pay", payFileServer)))
 	mainFileServer := http.FileServer(http.Dir("./static/main"))
 	mux.PathPrefix("/").
-		Handler(mainFileServer)
+		Handler(authEnv.AuthMiddleware(mainFileServer))
 
 }
 func main() {
